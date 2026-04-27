@@ -92,6 +92,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | KeeperHub Direct Execution | ✅ live | Real Base Sepolia transfer tx [`0x6ca23a64…`](https://sepolia.basescan.org/tx/0x6ca23a6491cd17fea40d3e9a866d3028a98709bfc548bd0bf98966e2e51f921b) |
 | KeeperHub MCP server (26 tools) | ✅ live | Streamable HTTP, real workflow listed — [Spike 8 PASS](#spike-results) |
 | LayerZero V2 OApps | ✅ live | 0G→Base message delivered, GUID `0x565ff853…` ([Spike 9 PASS](#spike-results)) |
+| iNFT royalty split (95/5 owner/creator) | ✅ live | 0.002 OG paid + on-chain split observed — [Spike 10 PASS](#spike-results) |
 | Cross-machine demo (laptop ⇄ Hetzner) | ⏳ pending | Day 7-10 |
 
 ---
@@ -141,6 +142,7 @@ Six contracts on 0G Galileo, ~0.038 OG total deploy cost:
 | `Bounty` (impl) | [`0x3905554071E2F121533EbB26Fcf7947C916299C1`](https://chainscan-galileo.0g.ai/address/0x3905554071E2F121533EbB26Fcf7947C916299C1) | Cloned per job |
 | `BountyFactory` | [`0x3fC3BA7e2700449Cde5F06a8DF6f5FA1E18201BE`](https://chainscan-galileo.0g.ai/address/0x3fC3BA7e2700449Cde5F06a8DF6f5FA1E18201BE) | EIP-1167 clone factory |
 | `StubVerifier` | [`0x5ceCfD0bF5E815D935E4b0b85F5a604B784CA6E5`](https://chainscan-galileo.0g.ai/address/0x5ceCfD0bF5E815D935E4b0b85F5a604B784CA6E5) | ERC-7857 verifier slot (TEE oracle is v2) |
+| `AgentRoyaltyVault` | [`0x61cb7bfca6ad0cb050ab227cb22710a932582c61`](https://chainscan-galileo.0g.ai/address/0x61cb7bfca6ad0cb050ab227cb22710a932582c61) | Pay-to-authorize with 95/5 owner/creator split — ERC-2981 |
 
 ## Smart contracts on Base Sepolia
 

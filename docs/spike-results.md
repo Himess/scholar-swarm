@@ -14,6 +14,7 @@
 | 7 | ERC-8004 + ERC-7857 spec | ✅ pass | Spec read; inheritance plan in `spike-07-erc8004-erc7857.md` | `AgentNFT` unifies ERC-7857 + ERC-8004 IdentityRegistry; separate `ReputationRegistry`; ValidationRegistry skipped |
 | 8 | KH MCP Streamable HTTP | ✅ pass | 26 tools live; list_workflows + list_action_schemas confirmed | KH canonical surface — depth of integration vs REST-only |
 | 9 | LayerZero V2 cross-chain | ✅ pass | 0G → Base end-to-end, GUID `0x565ff853…`, ~40s latency | DVN-attested. Trusted relay disclaimer DELETED. |
+| 10 | iNFT royalty split (live) | ✅ pass | 0.002 OG paid → 0.0019 owner / 0.0001 creator on-chain | tx `0xcef64b77…`, 95/5 split exact, isAuthorized true |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 
