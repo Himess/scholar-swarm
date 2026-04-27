@@ -43,3 +43,6 @@ Thumbs.db
 # Spike outputs (runtime artifacts, not source)
 scripts/out/
 docs/spike-artifacts/
+infra/axl-node-*/private.pem
+infra/axl/
+infra/axl-node-*/node.exe
