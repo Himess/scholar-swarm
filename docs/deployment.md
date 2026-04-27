@@ -87,3 +87,14 @@ All five Scholar Swarm agents are minted as ERC-7857 iNFTs at `AgentNFT` (`0x68c
 Full artifact: [`spike-artifacts/minted-agents.json`](spike-artifacts/minted-agents.json)
 
 This satisfies the 0G **Best Autonomous Agents, Swarms & iNFT** track requirement: *"link to the minted iNFT on 0G explorer + proof that the intelligence/memory is embedded."*
+
+## Day 6 #A — Synthesizer authorized to fire LZ message
+
+Prep for the on-chain `Bounty.submitSynthesis → BountyMessenger.notifyCompletion` integration:
+
+- Synthesizer operator wallet `0xe9A52F8794c7053fc4B3110c9b9E26EE9ac6D3F0` topped up to **0.5 OG** (LZ V2 fee per Spike 9 = ~0.345 OG)
+  - tx `0xb6e5cd78cc766b33f5335a0c77ccfc51f6e7c99d835acf9d781cafaf20c9310e`
+- BountyMessenger `setAuthorized(synthesizer, true)` on 0G Galileo
+  - tx `0xae689c871258a0c281a6a7f914c509290d20a6020e20480a67065ef6912f813e`
+
+The Synthesizer agent runtime can now invoke `notifyCompletion()` directly after `Bounty.submitSynthesis` lands. Wired into `apps/agent-synthesizer` runtime in Day 8 (E2E test).
