@@ -10,7 +10,7 @@
 | 2b | AXL cross-ISP mesh | ⏳ pending | — | — |
 | 3 | MCP over AXL | ⏳ pending | — | AXL pitch Plan A/B trigger |
 | 4 | KeeperHub x402 payment | ✅ pass | End-to-end transfer executed on Base Sepolia | TX `0x6ca23a64...` — KH Direct Execution full pipeline verified |
-| 5 | 0G Storage read-write | ⏳ pending | — | — |
+| 5 | 0G Storage read-write | ✅ pass | put(297B)=10.7s; get=2.3s; roundtrip equal | Root `0x42408920…` ; tx `0x3e1be7e1…fe5`; replicated to 3 nodes |
 | 7 | ERC-8004 + ERC-7857 spec | ✅ pass | Spec read; inheritance plan in `spike-07-erc8004-erc7857.md` | `AgentNFT` unifies ERC-7857 + ERC-8004 IdentityRegistry; separate `ReputationRegistry`; ValidationRegistry skipped |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
