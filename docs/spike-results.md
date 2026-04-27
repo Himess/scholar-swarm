@@ -5,11 +5,11 @@
 
 | # | Spike | Status | Outcome | Decision / Impact |
 |---|---|---|---|---|
-| 1 | 0G Compute inference | 🟡 partial | Catalog confirmed; inference deferred (need ≥5 OG) | Use indexed tuple access; SDK 0.7.5; TeeML via dstack |
+| 1 | 0G Compute inference | ✅ pass | Inference + attestation + tool-use ALL confirmed | Use indexed tuple access; SDK 0.7.5; TeeML via dstack; **tool use IS supported** |
 | 2a | AXL local mesh | ⏳ pending | — | — |
 | 2b | AXL cross-ISP mesh | ⏳ pending | — | — |
 | 3 | MCP over AXL | ⏳ pending | — | AXL pitch Plan A/B trigger |
-| 4 | KeeperHub x402 payment | 🟡 partial | Auth + network validation + execution tracking confirmed; tx fail due to 0 ETH gas | Network=`base-sepolia`; KH wallet `0x7109...934B` needs ~0.01 Base ETH |
+| 4 | KeeperHub x402 payment | ✅ pass | End-to-end transfer executed on Base Sepolia | TX `0x6ca23a64...` — KH Direct Execution full pipeline verified |
 | 5 | 0G Storage read-write | ⏳ pending | — | — |
 | 7 | ERC-8004 + ERC-7857 spec | ✅ pass | Spec read; inheritance plan in `spike-07-erc8004-erc7857.md` | `AgentNFT` unifies ERC-7857 + ERC-8004 IdentityRegistry; separate `ReputationRegistry`; ValidationRegistry skipped |
 
@@ -27,10 +27,10 @@ Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 ### Checklist
 - [x] Able to authenticate / initialize SDK (`@0glabs/0g-serving-broker@0.7.5`)
 - [x] Enumerate available models — **`qwen/qwen-2.5-7b-instruct`** (only chatbot on testnet)
-- [ ] One inference call returns text — **deferred** (insufficient OG balance, need ≥5)
-- [ ] Attestation blob captured + parsable — pending inference
-- [ ] Tool use / function calling supported — pending inference
-- [ ] Latency + cost recorded — pending inference
+- [x] One inference call returns text — confirmed 2026-04-27, 2685ms
+- [x] Attestation blob captured + parsable — `Attestation valid: true`, signer `0x83df4B8E...D508cF`
+- [x] Tool use / function calling supported — **YES**, model returned `calculator({"expression":"18 * 24"})`
+- [x] Latency + cost recorded — 2685ms; sub-account auto-funded 2 OG (~ unsettledFee 0.000006 OG per call)
 
 ### Findings
 - **Service tuple shape (SDK 0.7.5)** — `Result(11)` with indexed fields, NOT named properties:
@@ -48,8 +48,9 @@ Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 
 ### Decisions (PLAN.md §4 closures)
 - **O1 (model catalog) → CLOSED:** Use `qwen/qwen-2.5-7b-instruct` for both Researcher and Critic on testnet (different system prompts). Both attestations recorded. Same model is OK because TeeML signs each call independently with TEE-bound key.
-- **O2 (tool use) → DEFERRED:** Cannot test without funding. Mitigation: write code paths that work BOTH if tool-use supported and if not (researcher does retrieval externally then feeds context).
-- **Funding action:** Need 5 OG total. Faucet 0.1/day = 50 days. **Discord ask is critical path.** Or use 5 wallets faucet'd in parallel + transfer to one.
+- **O2 (tool use) → CLOSED YES:** 0G Compute provider supports OpenAI-compatible `tools` field. Verified by probing with a `calculator` tool — model returned a structured `tool_call`. **Implication:** Researcher can call retrieval, Critic can call source-fetch tool, both natively attested. Strengthens "agent-native" pitch.
+- **Funding:** 5 OG arrived via Discord faucet 2026-04-27. Wallet `0xF505...E5ae` now at 5.1 OG.
+- **TX trail (on Galileo):** `0x71bbe4e7…` (depositFund), `0xc3bbc9ca…` (initial sub-account), `0x777aed7e…`, `0x1fac5a5f…` (auto-fund top-ups).
 
 ---
 
