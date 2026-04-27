@@ -26,6 +26,7 @@
     "spike:09": "tsx --env-file=.env scripts/spike-09-lz-bridge.ts",
     "spike:all": "pnpm spike:01 && pnpm spike:02a && pnpm spike:02b && pnpm spike:04 && pnpm spike:05 && pnpm spike:03 && pnpm spike:07",
     "mint:agents": "tsx --env-file=.env scripts/mint-agents.ts",
+    "redistribute:agents": "tsx --env-file=.env scripts/redistribute-agents.ts",
     "demo": "tsx --env-file=.env scripts/demo.ts"
   },
   "devDependencies": {

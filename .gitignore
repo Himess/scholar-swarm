@@ -46,3 +46,4 @@ docs/spike-artifacts/
 infra/axl-node-*/private.pem
 infra/axl/
 infra/axl-node-*/node.exe
+docs/spike-artifacts/operator-wallets.json
