@@ -21,9 +21,10 @@ export type RoleId = StandardRoleId | string;
 
 /** Bid envelope when workers compete for sub-tasks. */
 export const BidSchema = z.object({
+  bountyId: z.string(),
+  subTaskIndex: z.number().int().min(0),
   agentId: z.string(),
   agentRole: z.string(),
-  subTaskIndex: z.number().int().min(0),
   priceUnits: z.string(), // bigint as decimal string
   reputationSnapshot: z.number().int().min(0),
   submittedAt: z.number().int(),
