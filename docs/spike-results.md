@@ -17,6 +17,8 @@
 | 10 | iNFT royalty split (live) | ✅ pass | 0.002 OG paid → 0.0019 owner / 0.0001 creator on-chain | tx `0xcef64b77…`, 95/5 split exact, isAuthorized true |
 | 11 | Bounty lifecycle E2E | ✅ pass | 16 txs, 6 distinct operator signers, full state machine Open→Completed | bountyId 2 at `0x4a6FE339…F0f2` (0G) |
 | 12 | Synth fires LZ → Base | ✅ pass | Synth signs `notifyCompletion` after synthesis, LZ delivers, Base emits DistributeRequested | GUID `0x1d96cc4c…`, base tx `0xa7f372d2…` |
+| 13 | KH MCP `ai_generate_workflow` | ✅ pass | KH AI drafted 6 ops → 2-node workflow (DistributeRequested trigger + distribute action) | `{prompt}` is the parameter name (not `description`); ops parse line-by-line |
+| 14 | KH `create_workflow` (live) | ✅ pass | Workflow created on org, returned id, verified via `list_workflows` | Workflow id `nepsavmovlyko0luy3rpi`; closes the cross-chain payout loop |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 
@@ -149,3 +151,54 @@ _TBD_
 
 ### Findings
 _TBD_
+
+---
+
+## Spike 13 — KeeperHub `ai_generate_workflow`
+
+**Run:** 2026-04-24
+**Script:** `scripts/spike-13-kh-workflow-generate.ts`
+**Artifact:** `docs/spike-artifacts/spike-13.json`
+
+### What it does
+Calls KH MCP tool `ai_generate_workflow` with a natural-language description of the
+DistributeRequested → PaymentRouter.distribute pipeline. KH's AI returns a stream of
+JSON operations (`setName`, `setDescription`, `addNode`, `addEdge`) that compose into
+a runnable workflow definition.
+
+### Outcome
+- ✅ MCP connect + tool call OK
+- ✅ Generated 6 operations: 1 setName, 1 setDescription, 2 addNode, 1 addEdge, 1 final
+- ✅ Trigger node: `web3/query-events` watching `DistributeRequested` on `BASE_PAYMENT_MESSENGER`
+- ✅ Action node: `web3/write-contract` calling `distribute(bytes32,address[],uint256[])` on `BASE_PAYMENT_ROUTER`
+
+### Gotcha
+The MCP tool parameter is `prompt`, not `description`. First call returned a 422 input-validation
+error; fixed in `packages/keeperhub-client/src/mcp.ts::aiGenerateWorkflow`.
+
+---
+
+## Spike 14 — KeeperHub `create_workflow` (live on org)
+
+**Run:** 2026-04-24
+**Script:** `scripts/spike-14-kh-workflow-create.ts`
+**Artifact:** `docs/spike-artifacts/spike-14.json`
+**Workflow id:** `nepsavmovlyko0luy3rpi`
+**Public link:** https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi
+
+### What it does
+Reads the operations stream from spike-13, replays them into a `{ name, description, nodes, edges }`
+workflow definition, then calls KH MCP `create_workflow` to persist it on the org. Verifies the
+workflow lands by listing all workflows and matching by name.
+
+### Outcome
+- ✅ create_workflow returned `id=nepsavmovlyko0luy3rpi`, ownerId, organizationId
+- ✅ list_workflows confirms the workflow is persisted on the org
+- ✅ Workflow closes the cross-chain payout loop end-to-end:
+  Synthesizer (0G) → BountyMessenger.notifyCompletion → LZ V2 → PaymentMessenger (Base)
+  → DistributeRequested event → **KH workflow** → PaymentRouter.distribute → USDC payouts
+
+### What this proves for the submission
+KeeperHub is live execution on our actual contract, not a mock — anyone can open the workflow URL
+and watch DistributeRequested events stream into the trigger node. KH retry + audit + gas estimation
+sit on the action node; we don't have to run a centralized relayer.

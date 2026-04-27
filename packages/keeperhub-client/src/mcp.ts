@@ -123,8 +123,8 @@ export class KeeperHubMCPClient {
   }
 
   /** Ask KH to AI-generate a workflow from a natural-language prompt. */
-  async aiGenerateWorkflow(description: string): Promise<CallToolResult> {
-    return this.callTool("ai_generate_workflow", { description });
+  async aiGenerateWorkflow(prompt: string): Promise<CallToolResult> {
+    return this.callTool("ai_generate_workflow", { prompt });
   }
 
   /** Inspect this org's wallet integration (Para wallet on KH). */
