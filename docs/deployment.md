@@ -57,3 +57,23 @@ forge script script/DeployBase.s.sol:DeployBase \
 | 1. 0G Compute inference | ✅ | `0x71bbe4e7…`, `0x777aed7e…`, `0x1fac5a5f…` (Galileo) |
 | 4. KH execute (Base transfer) | ✅ | `0x6ca23a64…91b` (Base Sepolia) |
 | 5. 0G Storage roundtrip | ✅ | `0x3e1be7e1…fe5` (Galileo storage) |
+
+## Minted Agent iNFTs (ERC-7857) — 0G Galileo
+
+All five Scholar Swarm agents are minted as ERC-7857 iNFTs at `AgentNFT` (`0x68c0175e9d9C6d39fC2278165C3Db93d484a5361`). Each has:
+
+- AES-256-GCM-encrypted intelligence stored on 0G Storage
+- Symmetric key bundled in `iNFT.encryptedKey` (TEE-bound re-encryption is v2)
+- `intelligenceRoot` field on-chain points at the storage merkle root
+
+| agentId | Name | Role | Storage Root | Mint TX |
+|---|---|---|---|---|
+| 1 | Planner-Alpha | Planner | `0x5bf94ba24417…` | [tx](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) |
+| 2 | Researcher-One | Researcher | `0x6ff1668a8e0b…` | [tx](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) |
+| 3 | Researcher-Two | Researcher | `0xddcde3746fc2…` | [tx](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) |
+| 4 | Critic-Prime | Critic | `0x14b122824a89…` | [tx](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) |
+| 5 | Synthesizer-Final | Synthesizer | `0x5053fc01c8a7…` | [tx](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) (`0x0cb6c4d91150…`) |
+
+Full artifact: [`spike-artifacts/minted-agents.json`](spike-artifacts/minted-agents.json)
+
+This satisfies the 0G **Best Autonomous Agents, Swarms & iNFT** track requirement: *"link to the minted iNFT on 0G explorer + proof that the intelligence/memory is embedded."*
