@@ -1,8 +1,9 @@
 /**
  * @scholar-swarm/mcp-tools
  *
- * Tavily retrieval adapter (RetrievalProvider impl) — lands Day 5.
- * Placeholder export so the workspace typechecks.
+ * Concrete RetrievalProvider impls used by the Researcher (search) and Critic
+ * (re-fetch + verify). Tavily is the default; swap by wiring a different
+ * provider into AgentProviders.retrieval.
  */
 
-export const MCP_TOOLS_PLACEHOLDER = "tavily-mcp-coming-day-5" as const;
+export { TavilyRetrievalProvider, type TavilyConfig } from "./tavily.js";

@@ -50,6 +50,20 @@ interface IBounty {
     event SynthesisComplete(uint256 indexed synthesizerAgentId, bytes32 reportRoot);
     event StatusChanged(BountyStatus indexed newStatus);
     event Cancelled(string reason);
+    event SettlementConfigured(
+        address indexed messenger,
+        uint256 indexed bountyId,
+        uint256 plannerFee,
+        uint256 criticFee,
+        uint256 synthesizerFee
+    );
+    event PayoutDispatched(
+        bytes32 indexed lzGuid,
+        uint64 nonce,
+        uint256 lzFeePaid,
+        address[] recipients,
+        uint256[] amounts
+    );
 
     error InvalidStatus(BountyStatus expected, BountyStatus actual);
     error NotPlanner();
@@ -57,6 +71,8 @@ interface IBounty {
     error SubTaskOutOfRange();
     error AlreadyAwarded();
     error AlreadyApproved();
+    error SettlementAlreadyConfigured();
+    error OnlyFactory();
 
     function status() external view returns (BountyStatus);
 
@@ -96,7 +112,32 @@ interface IBounty {
 
     function reviewClaim(uint8 subTaskIndex, uint256 criticAgentId, bool approved, string calldata reasonURI) external;
 
-    function submitSynthesis(uint256 synthesizerAgentId, bytes32 reportRoot) external;
+    function submitSynthesis(uint256 synthesizerAgentId, bytes32 reportRoot) external payable;
 
     function cancel(string calldata reason) external;
+
+    /// @notice One-shot wiring of cross-chain settlement. Callable by factory only.
+    /// @dev When configured, `submitSynthesis` will atomically fire a LayerZero V2
+    ///      message via the messenger to the Base counterpart on completion.
+    function configureSettlement(
+        address messenger,
+        uint256 bountyId,
+        uint256 plannerFee,
+        uint256 criticFee,
+        uint256 synthesizerFee
+    ) external;
+
+    function bountyMessenger() external view returns (address);
+
+    function bountyId() external view returns (uint256);
+
+    function plannerFee() external view returns (uint256);
+
+    function criticFee() external view returns (uint256);
+
+    function synthesizerFee() external view returns (uint256);
+
+    /// @notice Compute the settlement payout vector from on-chain state.
+    ///         Returns the same recipients/amounts the messenger will broadcast.
+    function previewPayouts() external view returns (address[] memory recipients, uint256[] memory amounts);
 }

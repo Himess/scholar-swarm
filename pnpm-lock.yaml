@@ -170,6 +170,9 @@ importers:
 
   packages/mcp-tools:
     dependencies:
+      '@scholar-swarm/sdk':
+        specifier: workspace:*
+        version: link:../swarm-sdk
       '@scholar-swarm/shared':
         specifier: workspace:*
         version: link:../shared

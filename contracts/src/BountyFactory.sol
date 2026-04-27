@@ -7,6 +7,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IBountyFactory} from "./interfaces/IBountyFactory.sol";
 import {Bounty} from "./Bounty.sol";
 
+interface IMessengerAuth {
+    function setAuthorized(address sender, bool allowed) external;
+}
+
 /// @title BountyFactory — minimal proxy factory for Bounty contracts on 0G Galileo
 /// @notice Each new research job spawns a fresh Bounty contract via EIP-1167 clone.
 /// @dev `relayer` is the trusted off-chain coordinator that binds Base Sepolia
@@ -17,13 +21,20 @@ contract BountyFactory is IBountyFactory, Ownable {
     address public immutable bountyImplementation;
     address public immutable agentRegistry;
     address public override relayer;
+    /// @dev BountyMessenger (LZ V2 OApp) for cross-chain settlement. Optional —
+    ///      bounties created via `createBounty` skip wiring; bounties created via
+    ///      `createBountyWithSettlement` get auto-wired.
+    address public override bountyMessenger;
 
     uint256 private _nextBountyId = 1;
     mapping(uint256 => address) private _bounties;
     mapping(uint256 => bytes32) private _payments;
 
+    event BountyMessengerUpdated(address indexed messenger);
+
     error NotRelayer();
     error AlreadyBound(uint256 bountyId);
+    error MessengerNotSet();
 
     constructor(address bountyImplementation_, address agentRegistry_, address relayer_, address owner_)
         Ownable(owner_)
@@ -49,6 +60,44 @@ contract BountyFactory is IBountyFactory, Ownable {
 
         Bounty(bountyAddress).initialize(msg.sender, budget, goalURI_, goalHash_, agentRegistry);
         emit BountyCreated(bountyAddress, msg.sender, bountyId, budget, goalURI_, goalHash_);
+    }
+
+    /// @inheritdoc IBountyFactory
+    function createBountyWithSettlement(
+        uint256 budget,
+        string calldata goalURI_,
+        bytes32 goalHash_,
+        uint256 plannerFee,
+        uint256 criticFee,
+        uint256 synthesizerFee
+    ) external override returns (uint256 bountyId, address bountyAddress) {
+        if (bountyMessenger == address(0)) revert MessengerNotSet();
+        if (budget == 0) revert InvalidBudget();
+        if (bytes(goalURI_).length == 0) revert EmptyGoal();
+
+        bountyId = _nextBountyId++;
+        bountyAddress = bountyImplementation.clone();
+        _bounties[bountyId] = bountyAddress;
+
+        Bounty(payable(bountyAddress)).initialize(msg.sender, budget, goalURI_, goalHash_, agentRegistry);
+        Bounty(payable(bountyAddress)).configureSettlement(
+            bountyMessenger,
+            bountyId,
+            plannerFee,
+            criticFee,
+            synthesizerFee
+        );
+        // Authorize this new bounty to call notifyCompletion on the messenger.
+        // Requires the factory to be the messenger's owner (transfer ownership post-deploy).
+        IMessengerAuth(bountyMessenger).setAuthorized(bountyAddress, true);
+        emit BountyCreated(bountyAddress, msg.sender, bountyId, budget, goalURI_, goalHash_);
+    }
+
+    /// @inheritdoc IBountyFactory
+    function setBountyMessenger(address messenger) external override onlyOwner {
+        require(messenger != address(0), "zero messenger");
+        bountyMessenger = messenger;
+        emit BountyMessengerUpdated(messenger);
     }
 
     /// @inheritdoc IBountyFactory

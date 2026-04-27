@@ -3,8 +3,19 @@ pragma solidity ^0.8.27;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
 import {IBounty} from "./interfaces/IBounty.sol";
+
+interface IBountyMessenger {
+    function notifyCompletion(
+        uint32 dstEid,
+        uint256 bountyId,
+        address[] calldata recipients,
+        uint256[] calldata amounts,
+        bytes calldata extraOptions
+    ) external payable returns (MessagingReceipt memory);
+}
 
 /// @title Bounty — single research-job state machine (0G Galileo)
 /// @notice Tracks one bounty's lifecycle from open → completed. Mirrors USDC escrow on
@@ -34,6 +45,14 @@ contract Bounty is IBounty, Initializable {
     IERC721 public agentRegistry;
     /// @dev BountyFactory address — only it can call init.
     address public factory;
+
+    /// @dev Cross-chain settlement wiring (optional; configured once by factory).
+    address public override bountyMessenger;
+    uint256 public override bountyId;
+    uint256 public override plannerFee;
+    uint256 public override criticFee;
+    uint256 public override synthesizerFee;
+    bool private _settlementConfigured;
 
     /// @dev Sub-task storage indexed 0..SUB_TASK_COUNT-1.
     mapping(uint8 => SubTask) private _subTasks;
@@ -225,7 +244,11 @@ contract Bounty is IBounty, Initializable {
     }
 
     /// @notice Synthesizer commits the final report root. Synthesizing → Completed.
-    function submitSynthesis(uint256 synthesizerAgentId_, bytes32 reportRoot) external override {
+    /// @dev If `bountyMessenger` is wired, this call also atomically dispatches the
+    ///      cross-chain payout request via LayerZero V2. The synthesizer must include
+    ///      the LZ native fee in `msg.value` (use `BountyMessenger.quote(...)` off-chain).
+    ///      If the messenger is unwired, msg.value MUST be 0 — caller refunds explicit.
+    function submitSynthesis(uint256 synthesizerAgentId_, bytes32 reportRoot) external payable override {
         if (_status != BountyStatus.Synthesizing) revert InvalidStatus(BountyStatus.Synthesizing, _status);
         if (msg.sender != agentRegistry.ownerOf(synthesizerAgentId_)) revert NotAuthorizedAgent();
         if (reportRoot == bytes32(0)) revert NotAuthorizedAgent();
@@ -235,6 +258,100 @@ contract Bounty is IBounty, Initializable {
         _status = BountyStatus.Completed;
         emit SynthesisComplete(synthesizerAgentId_, reportRoot);
         emit StatusChanged(BountyStatus.Completed);
+
+        // Auto-dispatch cross-chain payout if settlement is wired.
+        if (bountyMessenger != address(0)) {
+            (address[] memory recipients, uint256[] memory amounts) = _buildPayouts();
+            MessagingReceipt memory receipt = IBountyMessenger(bountyMessenger).notifyCompletion{value: msg.value}(
+                /*dstEid=*/ 0, // 0 → use messenger's defaultDstEid (Base Sepolia)
+                bountyId,
+                recipients,
+                amounts,
+                /*extraOptions=*/ ""
+            );
+            emit PayoutDispatched(receipt.guid, receipt.nonce, msg.value, recipients, amounts);
+        } else {
+            // Pure state-machine path: caller must not over-pay.
+            require(msg.value == 0, "no messenger; msg.value must be 0");
+        }
+    }
+
+    /// @notice One-shot wiring of cross-chain settlement. Callable by factory only.
+    function configureSettlement(
+        address messenger,
+        uint256 bountyId_,
+        uint256 plannerFee_,
+        uint256 criticFee_,
+        uint256 synthesizerFee_
+    ) external override {
+        if (msg.sender != factory) revert OnlyFactory();
+        if (_settlementConfigured) revert SettlementAlreadyConfigured();
+        _settlementConfigured = true;
+        bountyMessenger = messenger;
+        bountyId = bountyId_;
+        plannerFee = plannerFee_;
+        criticFee = criticFee_;
+        synthesizerFee = synthesizerFee_;
+        emit SettlementConfigured(messenger, bountyId_, plannerFee_, criticFee_, synthesizerFee_);
+    }
+
+    /// @notice Off-chain quote helper — same payouts the messenger will broadcast.
+    function previewPayouts()
+        external
+        view
+        override
+        returns (address[] memory recipients, uint256[] memory amounts)
+    {
+        return _buildPayouts();
+    }
+
+    /// @dev Build (recipients, amounts) from on-chain state. Layout (max 6 entries):
+    ///        [0] planner / plannerFee
+    ///        [1] critic  / criticFee     (skipped if criticAgentId == 0)
+    ///        [2] synthesizer / synthesizerFee
+    ///        [3..3+SUB_TASK_COUNT) per-sub-task researcher / awardedPrice
+    ///      Researchers winning multiple sub-tasks receive multiple entries (KH /
+    ///      PaymentRouter just does N transfers; cheaper than on-chain dedup).
+    ///      Service-role entries with fee == 0 OR with no agentId are skipped, so
+    ///      tests that don't configure fees still produce a valid array.
+    function _buildPayouts() internal view returns (address[] memory recipients, uint256[] memory amounts) {
+        // First pass: count valid entries.
+        uint256 n;
+        if (plannerFee > 0 && plannerAgentId != 0) ++n;
+        if (criticFee > 0 && criticAgentId != 0) ++n;
+        if (synthesizerFee > 0 && synthesizerAgentId != 0) ++n;
+        for (uint8 i = 0; i < SUB_TASK_COUNT; ++i) {
+            SubTask memory st = _subTasks[i];
+            if (st.awardedTo != 0 && st.awardedPrice > 0 && st.criticApproved) ++n;
+        }
+
+        recipients = new address[](n);
+        amounts = new uint256[](n);
+        uint256 k;
+
+        if (plannerFee > 0 && plannerAgentId != 0) {
+            recipients[k] = agentRegistry.ownerOf(plannerAgentId);
+            amounts[k] = plannerFee;
+            ++k;
+        }
+        if (criticFee > 0 && criticAgentId != 0) {
+            recipients[k] = agentRegistry.ownerOf(criticAgentId);
+            amounts[k] = criticFee;
+            ++k;
+        }
+        if (synthesizerFee > 0 && synthesizerAgentId != 0) {
+            recipients[k] = agentRegistry.ownerOf(synthesizerAgentId);
+            amounts[k] = synthesizerFee;
+            ++k;
+        }
+        for (uint8 i = 0; i < SUB_TASK_COUNT; ++i) {
+            SubTask memory st = _subTasks[i];
+            if (st.awardedTo != 0 && st.awardedPrice > 0 && st.criticApproved) {
+                recipients[k] = agentRegistry.ownerOf(st.awardedTo);
+                amounts[k] = st.awardedPrice;
+                ++k;
+            }
+        }
     }
 
     /// @notice User cancels — only allowed before completion.

@@ -67,7 +67,13 @@ export class ResearcherRole extends Role {
     }
   }
 
-  private async onSubTaskBroadcast(bountyId: string, subTaskIndex: number, _desc: string): Promise<void> {
+  // bountyId+subTaskIndex → the sub-question text. Cached on broadcast so we
+  // can use the actual question text as the retrieval query when awarded.
+  private subTaskDescriptions = new Map<string, string>();
+
+  private async onSubTaskBroadcast(bountyId: string, subTaskIndex: number, desc: string): Promise<void> {
+    this.subTaskDescriptions.set(`${bountyId}:${subTaskIndex}`, desc);
+
     const wins = this.myAwarded.get(bountyId)?.size ?? 0;
     if (wins >= this.maxConcurrentTasks) return; // already loaded
 
@@ -102,17 +108,22 @@ export class ResearcherRole extends Role {
   }
 
   private async research(bountyId: string, subTaskIndex: number): Promise<Findings> {
-    // 1. Retrieval (optional). If RetrievalProvider is wired, fetch sources.
-    //    Otherwise, fall back to model knowledge with low-confidence claims.
+    const subQuestion =
+      this.subTaskDescriptions.get(`${bountyId}:${subTaskIndex}`) ??
+      `bounty ${bountyId} task ${subTaskIndex}`;
+
+    // 1. Retrieval (optional). If RetrievalProvider is wired, fetch sources
+    //    using the actual sub-question text. Otherwise fall back to model
+    //    knowledge with low-confidence claims.
     let sourceContext = "";
     const retrieval = this.ctx.providers.retrieval;
     if (retrieval) {
-      const subTaskDesc = `bounty ${bountyId} task ${subTaskIndex}`;
       try {
-        const results = await retrieval.search(subTaskDesc, { maxResults: 5 });
+        const results = await retrieval.search(subQuestion, { maxResults: 5 });
         sourceContext = results
           .map((r, i) => `Source ${i + 1}: ${r.url}\nTitle: ${r.title}\nContent: ${r.content.slice(0, 800)}`)
           .join("\n\n");
+        this.log(`retrieval ok: ${results.length} sources for "${subQuestion.slice(0, 60)}…"`);
       } catch (err) {
         this.log(`retrieval failed, falling back to model knowledge: ${(err as Error).message}`);
       }
@@ -120,8 +131,8 @@ export class ResearcherRole extends Role {
 
     // 2. Inference — attested via 0G Compute.
     const userPrompt = sourceContext
-      ? `Sub-question: <bounty=${bountyId} task=${subTaskIndex}>\n\nSources:\n${sourceContext}\n\nProduce JSON claims.`
-      : `Sub-question: <bounty=${bountyId} task=${subTaskIndex}>\n\nNo retrieval available. Use training knowledge. Mark confidence ≤ 0.6.`;
+      ? `Sub-question: ${subQuestion}\n\nSources:\n${sourceContext}\n\nProduce JSON claims.`
+      : `Sub-question: ${subQuestion}\n\nNo retrieval available. Use training knowledge. Mark confidence ≤ 0.6.`;
     const res = await this.ctx.providers.inference.infer({
       messages: [
         { role: "system", content: RESEARCH_SYSTEM },

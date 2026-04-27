@@ -27,6 +27,23 @@ interface IBountyFactory {
         external
         returns (uint256 bountyId, address bountyAddress);
 
+    /// @notice Create a bounty AND wire its cross-chain settlement (LZ V2 messenger
+    ///         + per-role fees). On synthesis the bounty fires LZ automatically.
+    /// @dev Reverts if `bountyMessenger` on the factory is not set.
+    function createBountyWithSettlement(
+        uint256 budget,
+        string calldata goalURI,
+        bytes32 goalHash,
+        uint256 plannerFee,
+        uint256 criticFee,
+        uint256 synthesizerFee
+    ) external returns (uint256 bountyId, address bountyAddress);
+
+    /// @notice Owner sets the BountyMessenger (LZ V2 OApp) used for cross-chain settlement.
+    function setBountyMessenger(address messenger) external;
+
+    function bountyMessenger() external view returns (address);
+
     /// @notice Bind a Base Sepolia payment ref (tx hash + chain id) to the bounty.
     /// @dev Called by the cross-chain coordinator (trusted relay for hackathon).
     function bindPayment(uint256 bountyId, bytes32 baseChainPaymentRef) external;
