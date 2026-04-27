@@ -91,7 +91,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | MCP-over-AXL agent-to-tool | ✅ live | `/mcp/{peer}/test-service` roundtrip — [Spike 3 PASS](#spike-results) |
 | KeeperHub Direct Execution | ✅ live | Real Base Sepolia transfer tx [`0x6ca23a64…`](https://sepolia.basescan.org/tx/0x6ca23a6491cd17fea40d3e9a866d3028a98709bfc548bd0bf98966e2e51f921b) |
 | KeeperHub MCP server (26 tools) | ✅ live | Streamable HTTP, real workflow listed — [Spike 8 PASS](#spike-results) |
-| LayerZero V2 OApps | 🟡 compiled | Deploy + peer wiring + first message Day 5 |
+| LayerZero V2 OApps | ✅ live | 0G→Base message delivered, GUID `0x565ff853…` ([Spike 9 PASS](#spike-results)) |
 | Cross-machine demo (laptop ⇄ Hetzner) | ⏳ pending | Day 7-10 |
 
 ---
@@ -164,7 +164,20 @@ Why LZ V2: KeeperHub doesn't support 0G — verified live on the API: *"Unsuppor
 
 KeeperHub's role on Base side: a workflow watches `DistributeRequested` events and calls `PaymentRouter.distribute()` via Direct Execution API. Gas estimation, retry on failure, and full audit log are KH's job. The split is deliberate: **LayerZero proves the message, KeeperHub ensures the resulting tx lands.** Neither layer pretends to do the other's job.
 
-OApp source: [`contracts/src/BountyMessenger.sol`](./contracts/src/BountyMessenger.sol), [`contracts/src/PaymentMessenger.sol`](./contracts/src/PaymentMessenger.sol). Compiled. Deployment + peer wiring + first cross-chain message land Day 5.
+OApp source: [`contracts/src/BountyMessenger.sol`](./contracts/src/BountyMessenger.sol), [`contracts/src/PaymentMessenger.sol`](./contracts/src/PaymentMessenger.sol).
+
+**Deployed and live (Day 5 / 2026-04-27):**
+
+| Contract | Address |
+|---|---|
+| `BountyMessenger` (0G Galileo) | [`0x55b4bccdef026c8cbf5ab495a85aa28f235a4fed`](https://chainscan-galileo.0g.ai/address/0x55b4bccdef026c8cbf5ab495a85aa28f235a4fed) |
+| `PaymentMessenger` (Base Sepolia) | [`0x1a4aad2bc39934fa0256e279b8a9377d708a8cd4`](https://sepolia.basescan.org/address/0x1a4aad2bc39934fa0256e279b8a9377d708a8cd4) |
+
+First cross-chain message landed end-to-end ([Spike 9 PASS](#spike-results)):
+- 0G send tx: [`0x2f758adf…ad47`](https://chainscan-galileo.0g.ai/tx/0x2f758adf57c491466b2c73aa40f1410fc114abca246fb41ca45619984a36ad47)
+- LayerZero scan: [`testnet.layerzeroscan.com/tx/0x2f758adf…`](https://testnet.layerzeroscan.com/tx/0x2f758adf57c491466b2c73aa40f1410fc114abca246fb41ca45619984a36ad47)
+- Base receive tx: [`0x73a02576…a5bc`](https://sepolia.basescan.org/tx/0x73a0257686d534242b5cc570727e2b9c042b9e8aa210226e379fc3d68ceca5bc)
+- GUID `0x565ff853bb84954764b6d2546d40d37fb47c00aa4ea71f08829f0474389c9e45`, fee 0.345 OG, latency ~40s.
 
 ## Execution via KeeperHub
 

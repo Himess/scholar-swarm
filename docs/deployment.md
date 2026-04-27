@@ -57,6 +57,16 @@ forge script script/DeployBase.s.sol:DeployBase \
 | 1. 0G Compute inference | ✅ | `0x71bbe4e7…`, `0x777aed7e…`, `0x1fac5a5f…` (Galileo) |
 | 4. KH execute (Base transfer) | ✅ | `0x6ca23a64…91b` (Base Sepolia) |
 | 5. 0G Storage roundtrip | ✅ | `0x3e1be7e1…fe5` (Galileo storage) |
+| 9. LZ V2 cross-chain (0G→Base) | ✅ | send `0x2f758adf…ad47` / recv `0x73a02576…a5bc` / [LZ Scan](https://testnet.layerzeroscan.com/tx/0x2f758adf57c491466b2c73aa40f1410fc114abca246fb41ca45619984a36ad47) |
+
+## LayerZero V2 OApps (Day 5)
+
+| Contract | Address | Chain |
+|---|---|---|
+| `BountyMessenger` | [`0x55b4bccdef026c8cbf5ab495a85aa28f235a4fed`](https://chainscan-galileo.0g.ai/address/0x55b4bccdef026c8cbf5ab495a85aa28f235a4fed) | 0G Galileo, EID 40428 |
+| `PaymentMessenger` | [`0x1a4aad2bc39934fa0256e279b8a9377d708a8cd4`](https://sepolia.basescan.org/address/0x1a4aad2bc39934fa0256e279b8a9377d708a8cd4) | Base Sepolia, EID 40245 |
+
+Peers wired both directions. DVN: LayerZero Labs.
 
 ## Minted Agent iNFTs (ERC-7857) — 0G Galileo
 

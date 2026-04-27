@@ -13,6 +13,7 @@
 | 5 | 0G Storage read-write | ✅ pass | put(297B)=10.7s; get=2.3s; roundtrip equal | Root `0x42408920…` ; tx `0x3e1be7e1…fe5`; replicated to 3 nodes |
 | 7 | ERC-8004 + ERC-7857 spec | ✅ pass | Spec read; inheritance plan in `spike-07-erc8004-erc7857.md` | `AgentNFT` unifies ERC-7857 + ERC-8004 IdentityRegistry; separate `ReputationRegistry`; ValidationRegistry skipped |
 | 8 | KH MCP Streamable HTTP | ✅ pass | 26 tools live; list_workflows + list_action_schemas confirmed | KH canonical surface — depth of integration vs REST-only |
+| 9 | LayerZero V2 cross-chain | ✅ pass | 0G → Base end-to-end, GUID `0x565ff853…`, ~40s latency | DVN-attested. Trusted relay disclaimer DELETED. |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 
