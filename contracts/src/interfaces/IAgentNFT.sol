@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
-import {IERC7857, IERC7857Metadata, IERC7857Authorize} from "./IERC7857.sol";
+import {IERC7857, IERC7857Authorize} from "./IERC7857.sol";
 import {IIdentityRegistry} from "./IERC8004.sol";
 
 /// @title Scholar Swarm Agent NFT
-/// @notice Unified contract implementing ERC-7857 (iNFT core, metadata, authorize)
-///         and ERC-8004 IdentityRegistry. Each token represents one swarm agent.
+/// @notice Unified contract implementing ERC-7857 (iNFT core + authorize) and
+///         ERC-8004 IdentityRegistry. Each token represents one swarm agent.
 /// @dev Deployed on 0G Galileo. Encrypted intelligence (system prompt, role spec,
 ///      accumulated context) lives on 0G Storage; root committed on-chain.
-interface IAgentNFT is IERC7857, IERC7857Metadata, IERC7857Authorize, IIdentityRegistry {
+/// @dev Note: ERC-7857 Metadata functions are subsumed by IIdentityRegistry's
+///      get/setMetadata which have identical signatures. The concrete impl emits
+///      BOTH MetadataUpdate (ERC-7857) and MetadataSet (ERC-8004) events on writes.
+interface IAgentNFT is IERC7857, IERC7857Authorize, IIdentityRegistry {
     /// @notice Standard role identifiers used by Scholar Swarm.
     enum AgentRole {
         Planner,

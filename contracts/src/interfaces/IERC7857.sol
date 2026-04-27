@@ -34,7 +34,9 @@ interface IERC7857 is IERC721 {
 }
 
 interface IERC7857Metadata {
-    event MetadataUpdate(uint256 indexed tokenId, string indexed key, bytes value);
+    /// @dev Renamed from spec's `MetadataUpdate` to avoid clash with ERC-4906 `MetadataUpdate(uint256)`
+    /// emitted by OZ `ERC721URIStorage` on URI changes.
+    event MetadataUpdated(uint256 indexed tokenId, string indexed key, bytes value);
 
     function getMetadata(uint256 tokenId, string calldata key) external view returns (bytes memory);
 
