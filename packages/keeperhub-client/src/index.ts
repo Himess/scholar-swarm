@@ -8,3 +8,4 @@
  */
 
 export { KeeperHubPaymentProvider, type KeeperHubConfig } from "./payment.js";
+export { KeeperHubMCPClient, type KeeperHubMCPConfig, type CallToolResult } from "./mcp.js";
