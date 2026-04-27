@@ -93,6 +93,8 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | KeeperHub MCP server (26 tools) | ✅ live | Streamable HTTP, real workflow listed — [Spike 8 PASS](#spike-results) |
 | LayerZero V2 OApps | ✅ live | 0G→Base message delivered, GUID `0x565ff853…` ([Spike 9 PASS](#spike-results)) |
 | iNFT royalty split (95/5 owner/creator) | ✅ live | 0.002 OG paid + on-chain split observed — [Spike 10 PASS](#spike-results) |
+| Full Bounty lifecycle E2E (16 txs, 6 signers) | ✅ live | bountyId 2 at `0x4a6FE339…F0f2`, all state transitions on-chain — [Spike 11 PASS](#spike-results) |
+| Synth → LZ → Base full pipeline | ✅ live | Synth signs after synthesis, Base emits `DistributeRequested` — [Spike 12 PASS](#spike-results) |
 | Cross-machine demo (laptop ⇄ Hetzner) | ⏳ pending | Day 7-10 |
 
 ---
