@@ -373,6 +373,57 @@ We document our own gaps so judges don't have to find them.
 
 ---
 
+## AI tools usage
+
+Per ETHGlobal's submission rules, AI tools may **assist** the build but cannot **create the entire project**. This section documents how AI was used and what the human (Semih Civelek) did themselves. The full audit trail lives in [`docs/ai-collaboration/`](./docs/ai-collaboration/).
+
+### Tools used
+
+- **Claude Web (claude.ai)** — brainstorm + pitch refinement partner. ~6-8 hours total across Days -2 to 7. Did not write code.
+- **Claude Code (CLI)** — pair-programmer for implementation. Wrote scaffolding, contract iterations, spike scripts, and adapter packages **under human direction with every commit reviewed before push**.
+- **Cursor / VS Code** with AI completion — primary IDE for boilerplate work.
+
+Estimated total time: **~80-100 hours** by Day 7, of which AI assistance accelerated execution but did not replace human review.
+
+### What the human (Semih) did personally — not AI
+
+These were not AI-suggested. They came from the human, often after AI proposed a different approach:
+
+1. **Project selection.** Picked Scholar Swarm over 6+ alternatives after a 4-hour brainstorm. ([decision-log D1](./docs/ai-collaboration/decision-log.md))
+2. **Sponsor track choices.** 0G dual + Gensyn AXL + KeeperHub, selected based on architectural fit + pool ROI analysis I ran myself. ([D9](./docs/ai-collaboration/decision-log.md))
+3. **Pivot from trusted relayer to LayerZero V2.** Pre-pivot, the design assumed a small bot relayer would shuttle messages. I caught that this contradicted the "trustless multi-agent" pitch on Day 4 and pivoted to LZ V2 after verifying endpoints exist on both chains. ([D3](./docs/ai-collaboration/decision-log.md))
+4. **Bounty.submitSynthesis is `payable` and atomically fires LZ.** This is the single most architecturally important refactor of the build. AI's first instinct was a wrapper helper contract; I rejected that for an inline atomic dispatch. ([D4](./docs/ai-collaboration/decision-log.md))
+5. **Story-first README structure.** "AutoGPT for serious research" hook over buzzword salad. Came from my read of judge skim patterns + Veil VPN-style receipt structure. ([D5](./docs/ai-collaboration/decision-log.md))
+6. **Two physical machines for demo.** Not one laptop with 5 processes. ([D7](./docs/ai-collaboration/decision-log.md))
+7. **Debugging `Transfer_NativeFailed`.** Traced via `cast 4byte` → identified LZ V2 OApp `_payNative` strict-equality requirement → fixed by sending exact quoted fee instead of adding `receive()` to Bounty. The diagnostic + fix selection took ~30 minutes. AI executed the patch.
+8. **V2 backward-compat strategy.** Refactored Bounty additively (new init args optional via separate `configureSettlement`) so all 42 existing tests stayed green. ([D11](./docs/ai-collaboration/decision-log.md))
+
+### What AI did, under direction
+
+- Generated initial scaffold (Day 0-3 work — labeled honestly in commit `0e7e8b2` — 35 files / 21k lines but ~3.9k of those are pnpm-lock.yaml).
+- First-draft Solidity contracts; then iterated based on Foundry test failures + my review.
+- Spike scripts following the pattern I established in Spike 1.
+- Adapter packages (og-client, axl-client, keeperhub-client, mcp-tools) implementing the provider interfaces I designed in `swarm-sdk/src/providers.ts`.
+- README first drafts that I edited for tone, hook, and structural ordering.
+- Foundry deploy scripts; I ran them on testnet and verified on-chain.
+
+### Audit trail
+
+Everything in [`docs/ai-collaboration/`](./docs/ai-collaboration/):
+
+| File | What it is |
+|---|---|
+| [`PROJECT_BRIEF_v1.md`](./docs/ai-collaboration/PROJECT_BRIEF_v1.md) | Initial brief I wrote with Claude Web, before this repo existed |
+| [`PROJECT_BRIEF_v2.md`](./docs/ai-collaboration/PROJECT_BRIEF_v2.md) | Locked-in brief after Claude Code's red-flag review |
+| [`claude-code-feedback-v1.md`](./docs/ai-collaboration/claude-code-feedback-v1.md) | Claude Code's 5 red flags on v1, which I then fixed |
+| [`claude-code-feedback-v2.md`](./docs/ai-collaboration/claude-code-feedback-v2.md) | Claude Code's green-light on v2 + scope-management warnings |
+| [`decision-log.md`](./docs/ai-collaboration/decision-log.md) | 11 architectural decisions + alternatives + rationale, all attributed |
+| [`day-by-day-notes.md`](./docs/ai-collaboration/day-by-day-notes.md) | What happened each day, what blocked, what unblocked |
+
+Commit history is also part of the audit. 22 GPG-signed commits, distributed across 8 days, each with an explicit topic and a body that describes the change. No "AI dump" commits — the largest is the Day 0-3 initial scaffold (`0e7e8b2`), labeled honestly.
+
+---
+
 ## Day-by-day
 
 | Day | Date | Highlights |
