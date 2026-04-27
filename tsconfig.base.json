@@ -10,7 +10,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
@@ -18,7 +17,6 @@
     "skipLibCheck": true,
     "lib": ["ES2022"],
     "types": ["node"],
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true
+    "isolatedModules": true
   }
 }
