@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+next-env.d.ts
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# Turbo (if added later)
+.turbo/
+
+# Spike outputs (runtime artifacts, not source)
+scripts/out/
+docs/spike-artifacts/
