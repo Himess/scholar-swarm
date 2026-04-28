@@ -1,6 +1,7 @@
 /**
- * Spike 17 — END-TO-END demo: real Tavily + real 0G inference + real 0G Storage
- * + real Bounty lifecycle on 0G + real LZ V2 cross-chain to Base.
+ * Spike 17 — END-TO-END demo: real retrieval (SearXNG or Tavily) + real 0G
+ * inference + real 0G Storage + real Bounty lifecycle on 0G + real LZ V2
+ * cross-chain to Base.
  *
  * Single script that walks one bounty all the way from "user creates" to
  * "Bounty.submitSynthesis fires LayerZero V2", but with each agent role
@@ -36,9 +37,12 @@ import { join } from "node:path";
 
 import { ethers } from "ethers";
 
-import { TavilyRetrievalProvider } from "@scholar-swarm/mcp-tools";
+import {
+  TavilyRetrievalProvider,
+  SearxRetrievalProvider,
+} from "@scholar-swarm/mcp-tools";
 import { OGComputeInferenceProvider, OGStorageProvider } from "@scholar-swarm/og-client";
-import type { Claim, Findings, Report } from "@scholar-swarm/sdk";
+import type { Claim, Findings, Report, RetrievalProvider } from "@scholar-swarm/sdk";
 
 const ARTIFACT_DIR = join(process.cwd(), "docs", "spike-artifacts");
 
@@ -109,7 +113,7 @@ interface RunArtifact {
 }
 
 async function main(): Promise<void> {
-  console.log("=== Spike 17 — Full E2E (Tavily + 0G + LZ V2 + KH) ===\n");
+  console.log("=== Spike 17 — Full E2E (retrieval + 0G + LZ V2 + KH) ===\n");
   await mkdir(ARTIFACT_DIR, { recursive: true });
 
   const rpc = process.env["OG_RPC_URL"] ?? "https://evmrpc-testnet.0g.ai";
@@ -128,11 +132,21 @@ async function main(): Promise<void> {
 
   // ── Off-chain providers ─────────────────────────────────────────────────
   console.log("[setup] Wiring providers…");
-  const tavilyKey = process.env["TAVILY_API_KEY"];
-  const tavily = tavilyKey
-    ? new TavilyRetrievalProvider({ apiKey: tavilyKey, searchDepth: "basic" })
-    : null;
-  console.log(`  Tavily: ${tavily ? "configured (real search)" : "MISSING — using stub sources"}`);
+  const retrieval: RetrievalProvider | null = (() => {
+    const explicit = process.env["RETRIEVAL_PROVIDER"]?.toLowerCase();
+    const searxEndpoint = process.env["SEARXNG_ENDPOINT"];
+    const tavilyKey = process.env["TAVILY_API_KEY"];
+    if (explicit === "searxng" && searxEndpoint)
+      return new SearxRetrievalProvider({ endpoint: searxEndpoint });
+    if (explicit === "tavily" && tavilyKey)
+      return new TavilyRetrievalProvider({ apiKey: tavilyKey, searchDepth: "basic" });
+    if (searxEndpoint) return new SearxRetrievalProvider({ endpoint: searxEndpoint });
+    if (tavilyKey) return new TavilyRetrievalProvider({ apiKey: tavilyKey, searchDepth: "basic" });
+    return null;
+  })();
+  console.log(
+    `  Retrieval: ${retrieval ? `${retrieval.name} (real search)` : "MISSING — using stub sources"}`,
+  );
 
   const inferenceKey = must("DEMO_PLANNER_KEY"); // shared inference wallet (PLAN.md §3.4)
   const inference = await OGComputeInferenceProvider.create({ privateKey: inferenceKey });
@@ -238,8 +252,11 @@ async function main(): Promise<void> {
   console.log("  awarded\n");
 
   // ── Step 6: REAL research per sub-task ──────────────────────────────────
-  console.log("Step 6: Researchers do REAL research (Tavily → 0G infer → 0G store → submitFindings)…");
-  const retrievalArtifact: RunArtifact["retrieval"] = { provider: tavily ? "tavily" : "stub", perTask: [] };
+  console.log("Step 6: Researchers do REAL research (retrieval → 0G infer → 0G store → submitFindings)…");
+  const retrievalArtifact: RunArtifact["retrieval"] = {
+    provider: retrieval?.name ?? "stub",
+    perTask: [],
+  };
   const allFindings: Findings[] = [];
 
   const taskAssignments = [
@@ -255,16 +272,16 @@ async function main(): Promise<void> {
     // 6a. retrieval
     let sourceContext = "";
     let sourceUrls: string[] = [];
-    if (tavily) {
+    if (retrieval) {
       try {
-        const results = await tavily.search(subQuestion, { maxResults: 3 });
+        const results = await retrieval.search(subQuestion, { maxResults: 3 });
         sourceUrls = results.map((r) => r.url);
         sourceContext = results
           .map((r, i) => `Source ${i + 1}: ${r.url}\nTitle: ${r.title}\nExcerpt: ${r.content.slice(0, 600)}`)
           .join("\n\n");
-        console.log(`    Tavily: ${results.length} sources fetched`);
+        console.log(`    ${retrieval.name}: ${results.length} sources fetched`);
       } catch (err) {
-        console.log(`    Tavily failed: ${(err as Error).message}`);
+        console.log(`    ${retrieval.name} failed: ${(err as Error).message}`);
       }
     } else {
       // Graceful stub — no Tavily key
@@ -353,11 +370,11 @@ async function main(): Promise<void> {
     const claim = f.claims[0]!;
     const excerpt = claim.excerpts[0] ?? claim.text.slice(0, 300);
 
-    // 7a. (optional) http re-fetch of first source — uses Tavily.fetchUrl if available
+    // 7a. (optional) http re-fetch of first source — uses retrieval.fetchUrl if available
     let httpStatus = 0;
-    if (tavily && claim.sourceUrls[0]) {
+    if (retrieval && claim.sourceUrls[0]) {
       try {
-        const r = await tavily.fetchUrl(claim.sourceUrls[0]);
+        const r = await retrieval.fetchUrl(claim.sourceUrls[0]);
         httpStatus = r.status;
       } catch {
         /* */
@@ -543,7 +560,7 @@ async function main(): Promise<void> {
 
   console.log("\n=== Go/No-go Gate ===");
   console.log(`Bounty Completed:           ${finalStatus === 6n ? "✅" : "❌"}`);
-  console.log(`Tavily real sources:        ${tavily ? "✅" : "🟡 (TAVILY_API_KEY unset, used stub)"}`);
+  console.log(`Real sources (${retrieval?.name ?? "stub"}):${retrieval ? "  ✅" : "        🟡 (no retrieval provider configured)"}`);
   console.log(`0G inference calls:         ✅ ${inferenceCalls.length} attested`);
   console.log(`0G storage refs:            ✅ ${storageRefs.length}`);
   console.log(`LZ V2 message dispatched:   ${lzGuid ? "✅" : "❌"}`);
@@ -553,7 +570,7 @@ async function main(): Promise<void> {
     console.error("\n❌ Spike 17 incomplete.");
     process.exit(1);
   }
-  console.log("\n✅ Spike 17 PASS — full E2E with real Tavily + 0G + LZ + KH wiring proven on testnet.");
+  console.log(`\n✅ Spike 17 PASS — full E2E with real ${retrieval?.name ?? "stub"} retrieval + 0G + LZ + KH wiring proven on testnet.`);
   console.log(`   Synth tx (LZ launchpad): ${explorer}/tx/${synthTx.hash}`);
   console.log(`   LZ scan:                 https://testnet.layerzeroscan.com/tx/${synthTx.hash}`);
   console.log(`   KH workflow on Base:     https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi`);

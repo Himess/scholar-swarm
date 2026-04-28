@@ -7,12 +7,12 @@
 
 Three mechanisms make the difference:
 
-1. **Real source fetching.** Researchers retrieve web pages via Tavily MCP. No more "I read in some study…" — every claim carries a URL.
+1. **Real source fetching.** Researchers retrieve web pages via a self-hosted SearXNG (or Tavily MCP — both swappable). No more "I read in some study…" — every claim carries a URL.
 2. **Critic verification.** An independent agent fetches each cited URL and runs a separate attested LLM check: *does this excerpt actually support this claim?*
 3. **TEE-attested inference.** Every LLM call runs on 0G Compute inside a dstack TEE. The signed attestation proves *which model produced what*, replayable by any third party.
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 8 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **16/17 spikes PASS** with on-chain or live-network proofs (only Tavily smoke test pending an API key) · cross-chain payout loop closes end-to-end (Bounty → LZ V2 → KeeperHub workflow → Base USDC) · cross-ISP AXL mesh live (TR laptop ↔ EU VPS, bidirectional Yggdrasil round-trip) — proven by [Spike 17 full E2E](#spike-results) and [Spike 2b cross-ISP](#spike-results).
+**Status (Day 8 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **17/17 spikes PASS** with on-chain or live-network proofs · cross-chain payout loop closes end-to-end (Bounty → LZ V2 → KeeperHub workflow → Base USDC) · cross-ISP AXL mesh live (TR laptop ↔ EU VPS, bidirectional Yggdrasil round-trip) · self-hosted SearXNG retrieval running on the same VPS — proven by [Spike 17 full E2E](#spike-results), [Spike 2b cross-ISP](#spike-results), and [Spike 15 retrieval](#spike-results).
 
 ---
 
@@ -23,7 +23,7 @@ USER posts a research bounty                  →  Bounty contract on 0G Galileo
 PLANNER (iNFT #1) decomposes into 3 sub-tasks →  attested by 0G Compute
 RESEARCHERS (iNFT #2 + #3) bid on sub-tasks   →  reputation-weighted selection
         ↓
-   each fetches real web sources via Tavily
+   each fetches real web sources via SearXNG (or Tavily — swappable)
    produces source-attributed claims
    stores findings on 0G Storage (merkle root)
         ↓
@@ -94,7 +94,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | 5 agents minted as iNFTs (distinct operator wallets) | ✅ live | AgentNFT `0x68c0175e…` — [§ The five agents](#the-five-agents-live-infts-on-0g-galileo) |
 | AXL P2P mesh between agents | ✅ live | 2-node Yggdrasil mesh, "hello" delivered — [Spike 2a PASS](#spike-results) |
 | MCP-over-AXL agent-to-tool | ✅ live | `/mcp/{peer}/test-service` roundtrip — [Spike 3 PASS](#spike-results) |
-| Tavily retrieval adapter | ✅ live | `RetrievalProvider` impl in `@scholar-swarm/mcp-tools`, integrated into Researcher — [Spike 15](#spike-results) |
+| Retrieval adapters (SearXNG + Tavily, swappable) | ✅ live | Two `RetrievalProvider` impls in `@scholar-swarm/mcp-tools`; SearXNG self-hosted on the EU VPS, Tavily as the alternative — [Spike 15 PASS](#spike-results) |
 | KeeperHub Direct Execution | ✅ live | Real Base Sepolia transfer tx [`0x6ca23a64…`](https://sepolia.basescan.org/tx/0x6ca23a6491cd17fea40d3e9a866d3028a98709bfc548bd0bf98966e2e51f921b) |
 | KeeperHub MCP server (26 tools) | ✅ live | Streamable HTTP, real workflow listed — [Spike 8 PASS](#spike-results) |
 | KeeperHub workflow live on org | ✅ live | id [`nepsavmovlyko0luy3rpi`](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) — DistributeRequested → PaymentRouter.distribute — [Spike 13+14 PASS](#spike-results) |
@@ -102,7 +102,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | iNFT royalty split (95/5 owner/creator) | ✅ live | 0.002 OG paid + on-chain split observed — [Spike 10 PASS](#spike-results) |
 | Full Bounty lifecycle E2E (16 txs, 6 signers) | ✅ live | bountyId 2 at `0x4a6FE339…F0f2`, all state transitions on-chain — [Spike 11 PASS](#spike-results) |
 | **Bounty.submitSynthesis fires LZ atomically** | ✅ live | V2 factory + payable submitSynthesis — GUID `0x6cfdf46b…` — [Spike 16 PASS](#spike-results) |
-| **Full E2E** (Tavily/stub + 0G inference + 0G storage + bounty + LZ V2 + KH) | ✅ live | One script (`pnpm spike:17`), 7 attested inferences, 7 storage refs, GUID `0x82fcb3f2…` — [Spike 17 PASS](#spike-results) |
+| **Full E2E** (SearXNG retrieval + 0G inference + 0G storage + bounty + LZ V2 + KH) | ✅ live | One script (`pnpm spike:17`), real Google sources via self-hosted SearXNG, 7 attested inferences, 7 storage refs, GUID `0x83e18d89…` — [Spike 17 PASS](#spike-results) |
 | Cross-machine mesh (laptop TR ⇄ EU VPS) | ✅ live | Bidirectional `/send` ↔ `/recv` over Yggdrasil TLS round-trip, both peers in spanning tree — [Spike 2b PASS](#spike-results) |
 
 ---
@@ -219,7 +219,7 @@ KH integrates on **three surfaces** in this build:
 Gensyn AXL is the inter-agent backbone. Without AXL, a centralized message broker would replace it — defeating the *trustless multi-agent* claim.
 
 - **2-node local mesh verified** — peer ed25519 IDs `bddf078f…` ⇄ `55f1e064…`, "hello scholar swarm" delivered bidirectionally over Yggdrasil. ([Spike 2a PASS](#spike-results))
-- **MCP-over-AXL verified** — `POST /mcp/{peer_id}/{service}` round-trips through a mock router. This is the *peer-hosted tool* pattern that lets a Researcher's locally-hosted Tavily MCP serve all agents through the mesh. ([Spike 3 PASS](#spike-results))
+- **MCP-over-AXL verified** — `POST /mcp/{peer_id}/{service}` round-trips through a mock router. This is the *peer-hosted tool* pattern that lets a Researcher's locally-hosted retrieval (SearXNG or Tavily) serve all agents through the mesh. ([Spike 3 PASS](#spike-results))
 - **`@scholar-swarm/axl-client`** — typed `AXLMessagingProvider` wrapping the local HTTP API at `:9002`.
 
 Cross-ISP test (Spike 2b, laptop-TR ⇄ EU VPS) **PASS Day 8** — bidirectional Yggdrasil round-trip with the same `/send` + `/recv` API path that `pnpm spike:03` exercises locally. Same code, one extra line in `Peers`.
@@ -260,7 +260,7 @@ Each spike is a small standalone script that verifies one architectural assumpti
 | 12 | Synth fires LZ → Base (manual) | ✅ PASS | Synth signs `notifyCompletion`, Base emits `DistributeRequested` — GUID `0x1d96cc4c…`. |
 | 13 | KH `ai_generate_workflow` | ✅ PASS | KH AI drafted 6-op workflow definition for the DistributeRequested→distribute pipeline. |
 | 14 | KH `create_workflow` (live) | ✅ PASS | Workflow id [`nepsavmovlyko0luy3rpi`](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) persisted on the org. |
-| 15 | Tavily retrieval | 🟡 ready | Provider impl + smoke test in place; awaiting `TAVILY_API_KEY` to run real search. |
+| 15 | Retrieval (SearXNG / Tavily, swappable) | ✅ PASS | Self-hosted SearXNG on the EU VPS reachable via SSH tunnel; 5 real Google results in 1.3s, top URL re-fetched HTTP 200 (Critic verification path). |
 | 16 | **Bounty.submitSynthesis fires LZ atomically (V2)** | ✅ PASS | V2 factory + payable submitSynthesis dispatches `notifyCompletion` in one tx — GUID `0x6cfdf46b…`. |
 | 17 | **Full E2E** | ✅ PASS | Single script: 7 attested 0G inferences + 7 0G Storage refs + bounty lifecycle + LZ V2 — GUID `0x82fcb3f2…`. |
 
@@ -313,7 +313,7 @@ scholar-swarm/
 │   ├── og-client/                     ← Inference + Storage adapters
 │   ├── axl-client/                    ← Messaging adapter
 │   ├── keeperhub-client/              ← Payment (REST) + MCP (Streamable HTTP) adapters
-│   └── mcp-tools/                     ← TavilyRetrievalProvider impl
+│   └── mcp-tools/                     ← Tavily + SearXNG RetrievalProvider impls
 │
 ├── apps/
 │   ├── agent-planner/  ·  agent-researcher/
@@ -343,7 +343,7 @@ pnpm spike:05   # 0G Storage roundtrip
 pnpm spike:08   # KeeperHub MCP — list 26 tools
 pnpm spike:09   # LayerZero V2 0G→Base
 pnpm spike:14   # KeeperHub create_workflow live on org
-pnpm spike:15   # Tavily retrieval (set TAVILY_API_KEY first)
+pnpm spike:15   # Retrieval — picks SearXNG (SEARXNG_ENDPOINT) or Tavily (TAVILY_API_KEY)
 pnpm spike:16   # Bounty.submitSynthesis fires LZ atomically
 pnpm spike:17   # FULL E2E — one script, real providers, real cross-chain
 
@@ -363,7 +363,7 @@ Full deployment instructions and on-chain addresses in [`docs/deployment.md`](./
 We document our own gaps so judges don't have to find them.
 
 1. **Critic and Researcher run on the same testnet model.** 0G Galileo only has one chatbot service (`qwen-2.5-7b-instruct`). We mitigate with different system prompts + independent attestations, but genuine cross-model verification waits for mainnet (7 chatbots available).
-2. **Retrieval bias.** Tavily covers open-web well; paywalled sources (Bloomberg, WSJ) are skipped.
+2. **Retrieval bias.** SearXNG and Tavily cover open-web well; paywalled sources (Bloomberg, WSJ) are skipped.
 3. **Same-operator collusion is auditable but not prevented.** Five distinct agent wallets in the demo make it visible. World ID for sybil resistance is the v2 answer.
 4. **Demo agent wallets are funded from one dev account.** Each iNFT is owned by a distinct EOA; those EOAs are funded hierarchically for testnet convenience. Production agents would self-fund from earned payouts.
 5. **Reputation cold-start is seeded.** Demo agents ship with reputation reflecting prior test runs (12 jobs, etc.) — documented in `mint-agents.ts`. A live system needs a real bootstrapping mechanism.

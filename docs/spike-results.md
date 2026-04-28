@@ -19,6 +19,7 @@
 | 12 | Synth fires LZ → Base | ✅ pass | Synth signs `notifyCompletion` after synthesis, LZ delivers, Base emits DistributeRequested | GUID `0x1d96cc4c…`, base tx `0xa7f372d2…` |
 | 13 | KH MCP `ai_generate_workflow` | ✅ pass | KH AI drafted 6 ops → 2-node workflow (DistributeRequested trigger + distribute action) | `{prompt}` is the parameter name (not `description`); ops parse line-by-line |
 | 14 | KH `create_workflow` (live) | ✅ pass | Workflow created on org, returned id, verified via `list_workflows` | Workflow id `nepsavmovlyko0luy3rpi`; closes the cross-chain payout loop |
+| 15 | Retrieval (SearXNG / Tavily) | ✅ pass | Self-hosted SearXNG on the EU VPS, 5 real Google results in 1.3s, top URL re-fetch HTTP 200 | Two `RetrievalProvider` impls, swappable via env; SearXNG default avoids vendor lock-in |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 
@@ -208,3 +209,23 @@ workflow lands by listing all workflows and matching by name.
 KeeperHub is live execution on our actual contract, not a mock — anyone can open the workflow URL
 and watch DistributeRequested events stream into the trigger node. KH retry + audit + gas estimation
 sit on the action node; we don't have to run a centralized relayer.
+
+---
+
+## Spike 15 — Retrieval layer (SearXNG / Tavily)
+
+**Run:** 2026-04-28
+**Script:** `scripts/spike-15-retrieval.ts` (`pnpm spike:15`)
+**Artifact:** `docs/spike-artifacts/spike-15.json` (local)
+**Provider used in this run:** SearXNG (self-hosted on the EU VPS, reached via SSH tunnel `127.0.0.1:8888`)
+
+### Outcome
+- ✅ 5 real results returned in ~1.3s for query "What is LayerZero V2 DVN attestation and how does it differ from V1 oracle/relayer model?"
+- ✅ Top result re-fetched at HTTP 200 (Critic verification path) — `https://medium.com/layerzero-official/layerzero-v2-deep-dive-869f93e09850`, 339 KB body
+- ✅ Same `RetrievalProvider` interface implemented twice in `@scholar-swarm/mcp-tools` — `SearxRetrievalProvider` and `TavilyRetrievalProvider`. Switch by setting `RETRIEVAL_PROVIDER` env var; downstream code (Researcher, Critic) is unchanged.
+
+### Why two backends
+SearXNG is the default because it removes the third-party search-API dependency from the trustless multi-agent claim. SearXNG is open source (AGPL-3.0), federates Google / Bing / DuckDuckGo / Wikipedia under a unified JSON endpoint, and we run it on the same EU VPS that hosts the AXL listener (Spike 2b). Tavily remains supported as a hosted-API alternative for builds that prefer not to operate a search aggregator.
+
+### What this proves for the submission
+"Real source fetching" is real, with multi-engine federation and zero vendor lock-in. The Researcher's claims carry URLs that the Critic actually re-fetches; the search infrastructure is open-source code under our operational control.
