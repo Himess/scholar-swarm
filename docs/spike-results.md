@@ -292,3 +292,53 @@ every agent regardless of tree-update propagation timing.
 ### What this proves for the submission
 
 The "five specialist iNFT agents" claim is now five OS processes, with five operator wallets each having a distinct on-chain identity, distinct chain transactions (16 txs from 5 different signers in this run), and distinct 0G Compute ledger entries. The choreography runs over real AXL inter-process messaging (not in-process). No single coordinator owns the cross-chain payout — the Bounty contract dispatches it itself.
+
+---
+
+## Spike 19 — Circle USDC payout via KeeperHub Direct Execution
+
+**Run:** 2026-04-29
+**Script:** `scripts/spike-19-real-usdc-payout.ts` (`pnpm spike:19`)
+**Artifact:** `docs/spike-artifacts/spike-19.json`
+
+### What this is
+The cross-chain payout rail exercised with **Circle USDC** on Base Sepolia (`0x036CbD53…`, the canonical Circle-issued testnet USDC). User wallet funds a 1 USDC escrow into PaymentRouter, then the **KeeperHub Direct Execution REST API** is invoked — KH's Para wallet signs the `distribute()` call on our behalf, splitting the funds across the five Scholar Swarm operator wallets per the same fee schedule Bounty.sol uses.
+
+This closes the last simulated step in the Day-9 architecture: every previous spike showed "USDC *would* be paid", Spike 19 shows USDC *actually* paid.
+
+### What was on chain
+
+Base Sepolia (chainId 84532). All explorer links live.
+
+| Step | Tx | Link |
+|---|---|---|
+| `USDC.approve(router, 1 USDC)` | `0x0e539685a1ad8157a90111b0108f65e821afd1dddea859f99e318b41714ad120` | [basescan](https://sepolia.basescan.org/tx/0x0e539685a1ad8157a90111b0108f65e821afd1dddea859f99e318b41714ad120) |
+| `PaymentRouter.fund(bountyKey, 1e6)` | `0x9d6d8c0beb6d34d1e15dcbc01e0831c4f74317b54beede156d2d44bd041c0699` | [basescan](https://sepolia.basescan.org/tx/0x9d6d8c0beb6d34d1e15dcbc01e0831c4f74317b54beede156d2d44bd041c0699) |
+| **`PaymentRouter.distribute(...)` ← signed by KH Para wallet via Direct Execution API** | `0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7` | [basescan](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) |
+
+### Distribution split (matches Bounty.sol fee schedule)
+
+| Recipient | Wallet | USDC | Verified delta |
+|---|---|---:|---:|
+| Planner | `0xa2F013d2…` | 0.15 (15%) | +0.15 ✅ |
+| Researcher 1 | `0xfD794089…` | 0.30 (30%) | +0.30 ✅ |
+| Researcher 2 | `0x869fe9e3…` | 0.30 (30%) | +0.30 ✅ |
+| Critic | `0x9A5f0650…` | 0.15 (15%) | +0.15 ✅ |
+| Synthesizer | `0xe9A52F87…` | 0.10 (10%) | +0.10 ✅ |
+| **Total** | | **1.00** | **+1.00 (exact)** |
+
+PaymentRouter escrow row transitioned `Funded → Distributed` atomically inside the same `distribute()` tx; arrays validated by the contract's `sum(amounts) == totalAmount` check (revert otherwise).
+
+### KeeperHub execution metrics
+
+- **Endpoint:** `POST /api/execute/contract-call` then poll `GET /api/execute/{id}/status`
+- **Execution id:** `tb7t62lqdkmcure7sktwl`
+- **Trigger → on-chain confirmation:** **0.7 s**
+- **Gas used:** 199,623 units, paid by KH Para wallet (`0x7109C8e3…`), not by us
+- **Auth:** Bearer-token API key, no separate signing key on our side
+
+### What this proves for the submission
+
+1. **The economy settles end-to-end.** Circle USDC moves between operator wallets on Base Sepolia — Scholar Swarm picked Base for exactly this reason: it's where the canonical USDC contract lives.
+2. **KeeperHub is in the critical path, not optional.** The keeper that signed the payout was KH's Para wallet — we never had its private key. KH provides retry, gas estimation, and audit trail on top.
+3. **Cross-chain settle is end-to-end demonstrable.** With Spike 9 (LZ V2 0G→Base message), Spike 12 (Bounty atomically fires LZ on synthesis), Spike 18 (5-process choreography ending in an on-chain LZ tx), and Spike 19 (KH-signed USDC distribution), every link in the chain has on-chain proof.

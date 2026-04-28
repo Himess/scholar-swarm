@@ -12,7 +12,7 @@ Three mechanisms make the difference:
 3. **TEE-attested inference.** Every LLM call runs on 0G Compute inside a dstack TEE. The signed attestation proves *which model produced what*, replayable by any third party.
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 9 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **18/18 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
+**Status (Day 10 / 2026-04-29):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
 
 ---
 
@@ -42,7 +42,10 @@ THE CONTRACT FIRES THE PAYOUT — no relayer
    • Base counterpart emits DistributeRequested(guid, bountyId, recipients[], amounts[])
    • KeeperHub workflow nepsavmovlyko0luy3rpi watches the event and calls
      PaymentRouter.distribute() — gas estimation, retry, audit log
-   • USDC lands in five distinct agent wallets on Base Sepolia
+   • Circle USDC lands in five distinct agent wallets on Base — proven
+     on-chain in Spike 19, distribute tx 0xa06717e4… (~0.7 s after KH
+     trigger). The keeper signing distribute() is KH's Para wallet; we
+     never had its key.
 ```
 
 Run the whole pipeline yourself with `pnpm spike:17` (proven on testnet — see [Spike 17](#spike-results)).
@@ -104,6 +107,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | **Bounty.submitSynthesis fires LZ atomically** | ✅ live | V2 factory + payable submitSynthesis — GUID `0x6cfdf46b…` — [Spike 16 PASS](#spike-results) |
 | **Full E2E** (single-process orchestrator) | ✅ live | One script (`pnpm spike:17`), real Google sources via self-hosted SearXNG, 7 attested inferences, 7 storage refs, GUID `0x83e18d89…` — [Spike 17 PASS](#spike-results) |
 | **Multi-process choreography** (5 processes, 5 AXL nodes, 5 ledgers) | ✅ live | 5 OS processes coordinated bounty 20 end-to-end. 16 chain txs from 5 distinct operator wallets. Synth fires LZ V2 atomically — GUID `0x0c6eb880…` — [Spike 18 PASS](#spike-results) |
+| **Circle USDC end-to-end payout to 5 wallets** | ✅ live | KH Direct Execution signed `distribute()` with the Para wallet (we never had its key); 1.000000 USDC moved exactly per the Bounty.sol fee schedule. Tx [`0xa06717e4…`](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) — [Spike 19 PASS](#spike-results) |
 | Cross-machine mesh (laptop TR ⇄ EU VPS) | ✅ live | Bidirectional `/send` ↔ `/recv` over Yggdrasil TLS round-trip, both peers in spanning tree — [Spike 2b PASS](#spike-results) |
 
 ---
