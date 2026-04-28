@@ -46,4 +46,6 @@ docs/spike-artifacts/
 infra/axl-node-*/private.pem
 infra/axl/
 infra/axl-node-*/node.exe
+# laptop node has the private VPS IP in its peer list — keep local
+infra/axl-node-laptop/
 docs/spike-artifacts/operator-wallets.json

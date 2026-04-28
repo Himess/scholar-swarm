@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | 1 | 0G Compute inference | ✅ pass | Inference + attestation + tool-use ALL confirmed | Use indexed tuple access; SDK 0.7.5; TeeML via dstack; **tool use IS supported** |
 | 2a | AXL local mesh | ✅ pass | A→B "hello scholar swarm" delivered + B→A reverse | Two `node.exe` instances, peers `bddf078f…` & `55f1e064…`, default tcp_port |
-| 2b | AXL cross-ISP mesh | ⏳ pending | — | Hetzner provisioning (Day 7-10) |
+| 2b | AXL cross-ISP mesh | ✅ pass | TR laptop ↔ EU VPS bidirectional /send + /recv over Yggdrasil TLS, real internet | laptop pubkey `38b4976c…`, VPS pubkey `f2c4bc95…`, both keys in spanning tree |
 | 3 | MCP over AXL | ✅ pass | `/mcp/{peer}/test-service` roundtrip with mock router | RouterResponse envelope `{response,error}` is the contract; **Plan A pitch confirmed** |
 | 4 | KeeperHub x402 payment | ✅ pass | End-to-end transfer executed on Base Sepolia | TX `0x6ca23a64...` — KH Direct Execution full pipeline verified |
 | 5 | 0G Storage read-write | ✅ pass | put(297B)=10.7s; get=2.3s; roundtrip equal | Root `0x42408920…` ; tx `0x3e1be7e1…fe5`; replicated to 3 nodes |
@@ -78,17 +78,23 @@ _TBD_
 
 ## Spike 2b — AXL Cross-ISP Mesh
 
-**Run:** _TBD_
+**Run:** 2026-04-28
+**Setup:** [`docs/axl-vps-setup.md`](./axl-vps-setup.md)
+**Artifact:** `docs/spike-artifacts/spike-2b.json` (local only — provider details redacted from public artifact)
 
 ### Checklist
-- [ ] Laptop node running (TR ISP, NAT)
-- [ ] Hetzner node running (public IP)
-- [ ] Peer discovery Laptop → Hetzner
-- [ ] Peer discovery Hetzner → Laptop (NAT traversal)
-- [ ] Message RTT recorded
+- [x] Laptop node running (TR residential ISP, behind NAT) — pubkey `38b4976c…`
+- [x] EU VPS node running (Ubuntu 24.04, public IPv4) — pubkey `f2c4bc95…`, systemd `axl-node.service` enabled, ~2.4 MB RAM
+- [x] Outbound connect from laptop logged: `Connected outbound: <vps-ipv6>@<vps-ip>:9001`
+- [x] Both peers visible in `/topology` spanning tree (bidirectional discovery)
+- [x] Laptop → VPS `/send` round-trip: HTTP 200, payload arrived intact at VPS `/recv`
+- [x] VPS → laptop `/send` round-trip: HTTP 200, payload arrived intact at laptop `/recv`
 
 ### Findings
-_TBD — if NAT traversal fails, trigger §3.5 fallback (2nd VPS)_
+
+The mesh forms automatically the moment the laptop dials out — no NAT traversal hack needed because the residential side is the dialer (outbound TCP) and the VPS is the listener. Yggdrasil overlay handles routing, and the typed `/send` + `/recv` API on top of it is exactly the same code path that `scripts/spike-03-mcp-axl.ts` exercises locally — so the production stack is "the same code, with one more line in `Peers`."
+
+This closes the "different operators on different ISPs" pitch: the demo can run with Planner + Critic + Synthesizer on the laptop and the two Researchers on the VPS, talking over real internet, with no central message broker.
 
 ---
 

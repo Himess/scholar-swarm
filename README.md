@@ -12,7 +12,7 @@ Three mechanisms make the difference:
 3. **TEE-attested inference.** Every LLM call runs on 0G Compute inside a dstack TEE. The signed attestation proves *which model produced what*, replayable by any third party.
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 7 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **15/16 spikes PASS** with on-chain proofs · cross-chain payout loop closes end-to-end (Bounty → LZ V2 → KeeperHub workflow → Base USDC) — proven by [Spike 17 full E2E PASS](#spike-results).
+**Status (Day 8 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **16/17 spikes PASS** with on-chain or live-network proofs (only Tavily smoke test pending an API key) · cross-chain payout loop closes end-to-end (Bounty → LZ V2 → KeeperHub workflow → Base USDC) · cross-ISP AXL mesh live (TR laptop ↔ EU VPS, bidirectional Yggdrasil round-trip) — proven by [Spike 17 full E2E](#spike-results) and [Spike 2b cross-ISP](#spike-results).
 
 ---
 
@@ -69,7 +69,7 @@ Mint artifact: [`docs/spike-artifacts/minted-agents.json`](./docs/spike-artifact
 
 ## Demo video
 
-3-min demo records Day 11 (2026-05-02). Script outline: bounty creation → swarm coordination → critic catches a weak source → researcher retries → synthesis → **the contract fires the cross-chain payout itself** → KH workflow distributes USDC on Base → final report with per-claim source attribution. The on-camera run is `pnpm spike:17` against live testnet, with two physical machines (laptop in Türkiye + Hetzner VPS in Frankfurt) hosting the AXL mesh.
+3-min demo records Day 11 (2026-05-02). Script outline: bounty creation → swarm coordination → critic catches a weak source → researcher retries → synthesis → **the contract fires the cross-chain payout itself** → KH workflow distributes USDC on Base → final report with per-claim source attribution. The on-camera run is `pnpm spike:17` against live testnet, with two physical machines (laptop in Türkiye + EU VPS) hosting the AXL mesh — cross-ISP round-trip already verified ([Spike 2b PASS](#spike-results)).
 
 ---
 
@@ -103,7 +103,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | Full Bounty lifecycle E2E (16 txs, 6 signers) | ✅ live | bountyId 2 at `0x4a6FE339…F0f2`, all state transitions on-chain — [Spike 11 PASS](#spike-results) |
 | **Bounty.submitSynthesis fires LZ atomically** | ✅ live | V2 factory + payable submitSynthesis — GUID `0x6cfdf46b…` — [Spike 16 PASS](#spike-results) |
 | **Full E2E** (Tavily/stub + 0G inference + 0G storage + bounty + LZ V2 + KH) | ✅ live | One script (`pnpm spike:17`), 7 attested inferences, 7 storage refs, GUID `0x82fcb3f2…` — [Spike 17 PASS](#spike-results) |
-| Cross-machine demo (laptop ⇄ EU VPS) | ⏳ pending | Day 8-10 — [`docs/axl-vps-setup.md`](./docs/axl-vps-setup.md) is ready |
+| Cross-machine mesh (laptop TR ⇄ EU VPS) | ✅ live | Bidirectional `/send` ↔ `/recv` over Yggdrasil TLS round-trip, both peers in spanning tree — [Spike 2b PASS](#spike-results) |
 
 ---
 
@@ -222,7 +222,7 @@ Gensyn AXL is the inter-agent backbone. Without AXL, a centralized message broke
 - **MCP-over-AXL verified** — `POST /mcp/{peer_id}/{service}` round-trips through a mock router. This is the *peer-hosted tool* pattern that lets a Researcher's locally-hosted Tavily MCP serve all agents through the mesh. ([Spike 3 PASS](#spike-results))
 - **`@scholar-swarm/axl-client`** — typed `AXLMessagingProvider` wrapping the local HTTP API at `:9002`.
 
-Cross-ISP test (Spike 2b, laptop-TR ⇄ Hetzner-DE) lands Day 7-10 once VPS is provisioned.
+Cross-ISP test (Spike 2b, laptop-TR ⇄ EU VPS) **PASS Day 8** — bidirectional Yggdrasil round-trip with the same `/send` + `/recv` API path that `pnpm spike:03` exercises locally. Same code, one extra line in `Peers`.
 
 ---
 
@@ -248,7 +248,7 @@ Each spike is a small standalone script that verifies one architectural assumpti
 |---|---|---|---|
 | 1 | 0G Compute sealed inference | ✅ PASS | qwen2.5-7b TeeML, attestation valid, tool use yes (calculator(18*24)→432). |
 | 2a | AXL local mesh | ✅ PASS | 2 `node.exe` instances, "hello scholar swarm" delivered. |
-| 2b | AXL cross-ISP mesh | ⏳ pending | [`docs/axl-vps-setup.md`](./docs/axl-vps-setup.md) ready; provider-agnostic, EU VPS to be wired Day 8-10. |
+| 2b | AXL cross-ISP mesh | ✅ PASS | TR laptop (residential NAT) ↔ EU VPS (public IPv4) bidirectional Yggdrasil round-trip; both pubkeys in spanning tree; messages delivered intact in both directions. Setup: [`docs/axl-vps-setup.md`](./docs/axl-vps-setup.md). |
 | 3 | MCP-over-AXL | ✅ PASS | `/mcp/{peer}/test-service` round-trip via mock router. |
 | 4 | KeeperHub Direct Execution | ✅ PASS | Live Base Sepolia transfer tx `0x6ca23a64…`. |
 | 5 | 0G Storage roundtrip | ✅ PASS | put 297B → root `0x42408920…`, get 2.3s, content equal. |
@@ -435,10 +435,10 @@ Commit history is also part of the audit. 22 GPG-signed commits, distributed acr
 | 4 | 2026-04-27 | OpenClaw SDK framing, 5 iNFTs minted, AXL mesh + MCP-over-AXL PASS, KH MCP client (26 tools), LZ V2 OApps written |
 | 5 | 2026-04-27 | LZ deploy + peer wiring + first cross-chain message (Spike 9); 5 distinct operator wallets; iNFT royalty hook (Spike 10) |
 | 6 | 2026-04-27 | Bounty lifecycle E2E (Spike 11) + Synth → LZ pipeline (Spike 12); KH workflow drafted via MCP (Spike 13) and persisted live (Spike 14) |
-| 7 | 2026-04-28 | Tavily retrieval adapter + Bounty.sol auto-fires LZ on synthesis (Spike 16) + full E2E orchestrator (Spike 17). Hetzner setup doc ready. |
-| 8 | 2026-04-29 | Hetzner CX22 provisioning + Spike 2b cross-ISP mesh + Tavily smoke test (real key) |
-| 9 | 2026-04-30 | E2E single-machine dry run with all real providers + frontend polish |
-| 10 | 2026-05-01 | Two-machine demo dry run (laptop TR + Hetzner DE) |
+| 7 | 2026-04-28 | Tavily retrieval adapter + Bounty.sol auto-fires LZ on synthesis (Spike 16) + full E2E orchestrator (Spike 17) + AI-collaboration audit folder. |
+| 8 | 2026-04-28 | EU VPS AXL node deployed (systemd, ~2.4 MB RAM) + **Spike 2b PASS** — TR laptop ↔ EU VPS bidirectional Yggdrasil round-trip, both peers in spanning tree. |
+| 9 | 2026-04-29 | Tavily smoke test with real key (Spike 15) + frontend polish + single-machine E2E dry run with all real providers |
+| 10 | 2026-05-01 | Two-machine demo dry run (laptop TR + EU VPS) |
 | 11 | 2026-05-02 | Demo video record + README final + sponsor pitches + KH FEEDBACK.md |
 | 12 | 2026-05-03 | Submit (deadline: 19:00 TR / 12:00 ET) |
 
