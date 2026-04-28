@@ -103,7 +103,7 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | Full Bounty lifecycle E2E (16 txs, 6 signers) | ✅ live | bountyId 2 at `0x4a6FE339…F0f2`, all state transitions on-chain — [Spike 11 PASS](#spike-results) |
 | **Bounty.submitSynthesis fires LZ atomically** | ✅ live | V2 factory + payable submitSynthesis — GUID `0x6cfdf46b…` — [Spike 16 PASS](#spike-results) |
 | **Full E2E** (Tavily/stub + 0G inference + 0G storage + bounty + LZ V2 + KH) | ✅ live | One script (`pnpm spike:17`), 7 attested inferences, 7 storage refs, GUID `0x82fcb3f2…` — [Spike 17 PASS](#spike-results) |
-| Cross-machine demo (laptop ⇄ Hetzner) | ⏳ pending | Day 8-10 — [`docs/hetzner-setup.md`](./docs/hetzner-setup.md) is ready |
+| Cross-machine demo (laptop ⇄ EU VPS) | ⏳ pending | Day 8-10 — [`docs/axl-vps-setup.md`](./docs/axl-vps-setup.md) is ready |
 
 ---
 
@@ -248,7 +248,7 @@ Each spike is a small standalone script that verifies one architectural assumpti
 |---|---|---|---|
 | 1 | 0G Compute sealed inference | ✅ PASS | qwen2.5-7b TeeML, attestation valid, tool use yes (calculator(18*24)→432). |
 | 2a | AXL local mesh | ✅ PASS | 2 `node.exe` instances, "hello scholar swarm" delivered. |
-| 2b | AXL cross-ISP mesh | ⏳ pending | [`docs/hetzner-setup.md`](./docs/hetzner-setup.md) ready; CX22 Frankfurt to be provisioned Day 8-10. |
+| 2b | AXL cross-ISP mesh | ⏳ pending | [`docs/axl-vps-setup.md`](./docs/axl-vps-setup.md) ready; provider-agnostic, EU VPS to be wired Day 8-10. |
 | 3 | MCP-over-AXL | ✅ PASS | `/mcp/{peer}/test-service` round-trip via mock router. |
 | 4 | KeeperHub Direct Execution | ✅ PASS | Live Base Sepolia transfer tx `0x6ca23a64…`. |
 | 5 | 0G Storage roundtrip | ✅ PASS | put 297B → root `0x42408920…`, get 2.3s, content equal. |
@@ -322,7 +322,7 @@ scholar-swarm/
 │
 ├── scripts/                           ← spike-01…17 + mint-agents + topup-operators
 ├── infra/                             ← AXL nodes, mock MCP router
-└── docs/                              ← deployment.md, hetzner-setup.md, sponsor-reference.md, spike-results.md, spike-artifacts/
+└── docs/                              ← deployment.md, axl-vps-setup.md, sponsor-reference.md, spike-results.md, spike-artifacts/, ai-collaboration/
 ```
 
 ---
