@@ -4,7 +4,11 @@
 
 import { Agent } from "@scholar-swarm/sdk";
 import type { AgentProviders } from "@scholar-swarm/sdk";
-import { OGComputeInferenceProvider, OGStorageProvider } from "@scholar-swarm/og-client";
+import {
+  EVMChainAdapter,
+  OGComputeInferenceProvider,
+  OGStorageProvider,
+} from "@scholar-swarm/og-client";
 import { AXLMessagingProvider } from "@scholar-swarm/axl-client";
 
 import { CriticRole } from "./role.js";
@@ -17,7 +21,7 @@ function must(name: string): string {
 
 async function main(): Promise<void> {
   const log = makeLogger("critic");
-  const privateKey = must("DEMO_CRITIC_KEY");
+  const privateKey = must("CRITIC_OPERATOR_KEY");
 
   const inference = await OGComputeInferenceProvider.create({
     rpcUrl: process.env["OG_RPC_URL"],
@@ -33,15 +37,30 @@ async function main(): Promise<void> {
   log("0G Storage ready");
 
   const messaging = new AXLMessagingProvider({
-    endpoint: process.env["AXL_ENDPOINT"],
+    endpoint: process.env["AXL_ENDPOINT"] ?? "http://127.0.0.1:9104",
     peerId: must("AXL_PEER_ID_CRITIC"),
+    staticPeers: [
+      process.env["AXL_PEER_ID_PLANNER"],
+      process.env["AXL_PEER_ID_RESEARCHER_1"],
+      process.env["AXL_PEER_ID_RESEARCHER_2"],
+      process.env["AXL_PEER_ID_CRITIC"],
+      process.env["AXL_PEER_ID_SYNTHESIZER"],
+    ].filter((x): x is string => typeof x === "string" && x.length > 0),
+    log,
   });
-  log(`AXL ready peer=${messaging.peerId}`);
+  log(`AXL ready peer=${messaging.peerId.slice(0, 12)}…`);
 
-  const providers: AgentProviders = { inference, storage, messaging };
+  const chain = new EVMChainAdapter({
+    rpcUrl: process.env["OG_RPC_URL"] ?? "https://evmrpc-testnet.0g.ai",
+    privateKey,
+    messengerAddress: must("OG_BOUNTY_MESSENGER"),
+  });
+  log(`Chain adapter ready signer=${chain.signerAddress}`);
+
+  const providers: AgentProviders = { inference, storage, messaging, chain };
 
   const agent = new Agent({
-    agentId: must("CRITIC_AGENT_ID"),
+    agentId: process.env["CRITIC_AGENT_ID"] ?? "4",
     operatorWallet: must("CRITIC_OPERATOR_WALLET"),
     providers,
     role: new CriticRole({

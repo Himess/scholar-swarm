@@ -54,7 +54,14 @@ export class ResearcherRole extends Role {
 
   async handle(msg: SwarmMessage, _sender: string): Promise<void> {
     switch (msg.kind) {
+      case "bounty.broadcast":
+        // Cache address so we can place chain bids when subtasks come in.
+        if (msg.bounty.address) this.setBountyAddress(msg.bounty.id, msg.bounty.address);
+        return;
       case "subtask.broadcast":
+        // Cache bountyAddress if planner included it (subtask.broadcast carries
+        // it precisely because researchers don't see the user→planner direct send).
+        if ((msg as any).bountyAddress) this.setBountyAddress(msg.bountyId, (msg as any).bountyAddress);
         await this.onSubTaskBroadcast(msg.bountyId, msg.subTaskIndex, msg.description);
         return;
       case "bid.awarded":
@@ -78,6 +85,27 @@ export class ResearcherRole extends Role {
     if (wins >= this.maxConcurrentTasks) return; // already loaded
 
     const price = this.computePrice();
+
+    // 1. On-chain placeBid (idempotent guard via try/catch — duplicate bid will revert).
+    const chain = this.ctx.providers.chain;
+    const bountyAddress = this.bountyAddressFor(bountyId);
+    if (chain && bountyAddress) {
+      try {
+        const r = await chain.placeBid(
+          bountyAddress,
+          subTaskIndex,
+          BigInt(this.ctx.agentId),
+          price,
+          BigInt(this.reputationSnapshot),
+        );
+        this.log(`placeBid task=${subTaskIndex} tx=${r.txHash}`);
+      } catch (err) {
+        this.log(`placeBid task=${subTaskIndex} failed: ${(err as Error).message}`);
+        return;
+      }
+    }
+
+    // 2. AXL signal so the planner sees our bid quickly.
     await this.broadcast({
       kind: "bid",
       bid: {
@@ -90,7 +118,17 @@ export class ResearcherRole extends Role {
         submittedAt: Date.now(),
       },
     });
-    this.log(`bid placed: bounty=${bountyId} task=${subTaskIndex} price=${price}`);
+    this.log(`bid broadcast: task=${subTaskIndex} price=${price}`);
+  }
+
+  // Multi-process flow needs to know the on-chain Bounty contract address.
+  // Stored when the runtime captures bounty.broadcast on its way past.
+  private bountyAddresses = new Map<string, string>();
+  protected setBountyAddress(bountyId: string, address: string): void {
+    this.bountyAddresses.set(bountyId, address);
+  }
+  private bountyAddressFor(bountyId: string): string | undefined {
+    return this.bountyAddresses.get(bountyId);
   }
 
   private async onAwardedToMe(bountyId: string, subTaskIndex: number): Promise<void> {
@@ -153,7 +191,7 @@ export class ResearcherRole extends Role {
       reasoningTrace: res.content.slice(0, 500),
     };
 
-    // 3. Store findings on 0G Storage if available.
+    // 3. Store findings on 0G Storage. The merkle root is what we anchor on chain.
     const findingsBody: Findings = {
       bountyId,
       subTaskIndex,
@@ -162,11 +200,31 @@ export class ResearcherRole extends Role {
       reasoningTrace: parsed.reasoningTrace ?? "",
       attestation: res.attestation,
     };
+
+    let findingsRoot: string | null = null;
     try {
       const ref = await this.ctx.providers.storage.putJSON(findingsBody);
+      findingsRoot = ref.id;
       this.log(`findings stored at ${ref.uri ?? ref.id}`);
     } catch (err) {
       this.log(`storage put failed (continuing): ${(err as Error).message}`);
+    }
+
+    // 4. On-chain submitFindings.
+    const chain = this.ctx.providers.chain;
+    const bountyAddress = this.bountyAddressFor(bountyId);
+    if (chain && bountyAddress && findingsRoot) {
+      try {
+        const r = await chain.submitFindings(
+          bountyAddress,
+          subTaskIndex,
+          BigInt(this.ctx.agentId),
+          findingsRoot,
+        );
+        this.log(`submitFindings task=${subTaskIndex} tx=${r.txHash}`);
+      } catch (err) {
+        this.log(`submitFindings task=${subTaskIndex} failed: ${(err as Error).message}`);
+      }
     }
 
     return findingsBody;

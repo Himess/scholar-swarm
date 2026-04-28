@@ -32,6 +32,8 @@
     "spike:15": "tsx --env-file=.env scripts/spike-15-retrieval.ts",
     "spike:16": "tsx --env-file=.env scripts/spike-16-bounty-fires-lz.ts",
     "spike:17": "tsx --env-file=.env scripts/spike-17-full-e2e.ts",
+    "spike:18": "tsx --env-file=.env scripts/spike-18-launch.ts",
+    "spike:18:cli": "tsx --env-file=.env scripts/spike-18-cli.ts",
     "spike:all": "pnpm spike:01 && pnpm spike:02a && pnpm spike:02b && pnpm spike:04 && pnpm spike:05 && pnpm spike:03 && pnpm spike:07",
     "mint:agents": "tsx --env-file=.env scripts/mint-agents.ts",
     "redistribute:agents": "tsx --env-file=.env scripts/redistribute-agents.ts",

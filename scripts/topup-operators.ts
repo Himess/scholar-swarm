@@ -14,9 +14,11 @@ function must(name: string): string {
 }
 
 // Synth pays the LZ V2 native fee (~0.4 OG for 6-recipient payload), so it
-// needs much more than the gas-only operator wallets.
-const TARGET = ethers.parseEther("0.03");
-const SYNTH_TARGET = ethers.parseEther("0.5");
+// needs much more than the gas-only operator wallets. The other agents each
+// also need to fund their own 0G Compute ledger (~0.3 OG, see Spike 18 bootstrap),
+// hence the 0.4 OG floor for everyone.
+const TARGET = ethers.parseEther(process.env["TOPUP_TARGET_OG"] ?? "0.4");
+const SYNTH_TARGET = ethers.parseEther(process.env["TOPUP_SYNTH_TARGET_OG"] ?? "0.5");
 
 async function main(): Promise<void> {
   const rpc = process.env["OG_RPC_URL"] ?? "https://evmrpc-testnet.0g.ai";

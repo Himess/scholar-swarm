@@ -20,6 +20,9 @@
 | 13 | KH MCP `ai_generate_workflow` | ✅ pass | KH AI drafted 6 ops → 2-node workflow (DistributeRequested trigger + distribute action) | `{prompt}` is the parameter name (not `description`); ops parse line-by-line |
 | 14 | KH `create_workflow` (live) | ✅ pass | Workflow created on org, returned id, verified via `list_workflows` | Workflow id `nepsavmovlyko0luy3rpi`; closes the cross-chain payout loop |
 | 15 | Retrieval (SearXNG / Tavily) | ✅ pass | Self-hosted SearXNG on the EU VPS, 5 real Google results in 1.3s, top URL re-fetch HTTP 200 | Two `RetrievalProvider` impls, swappable via env; SearXNG default avoids vendor lock-in |
+| 16 | Bounty.submitSynthesis fires LZ atomically (V2) | ✅ pass | V2 factory + payable submitSynthesis dispatches notifyCompletion in one tx — GUID `0x6cfdf46b…` | First architectural slice that closes the cross-chain loop without an off-chain coordinator |
+| 17 | Full E2E (single-process orchestrator) | ✅ pass | Spike 17 PASS, 7 attested 0G inferences + 7 0G Storage refs + bounty + LZ V2, GUID `0x82fcb3f2…` (SearXNG) | One `pnpm spike:17` runs the entire pipeline; functions as the demo fallback |
+| 18 | Multi-process choreography (5 processes, 5 AXL nodes, 5 ledgers) | ✅ pass | 5 OS processes coordinated bounty 20 end-to-end. Each agent signed its own chain tx + ran inference under its own 0G ledger. Synth fired LZ V2, GUID `0x0c6eb880…` | This is the "five different operators" pitch made literal |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 
@@ -229,3 +232,63 @@ SearXNG is the default because it removes the third-party search-API dependency 
 
 ### What this proves for the submission
 "Real source fetching" is real, with multi-engine federation and zero vendor lock-in. The Researcher's claims carry URLs that the Critic actually re-fetches; the search infrastructure is open-source code under our operational control.
+
+---
+
+## Spike 18 — Multi-process choreography (5 processes, 5 AXL nodes)
+
+**Run:** 2026-04-28
+**Setup:** [`docs/spike-18-design.md`](./spike-18-design.md)
+**Bootstrap:** `scripts/spike-18-bootstrap-inference.ts` (one-shot per-agent ledger funding)
+**Run:** `pnpm spike:18` in one terminal + `pnpm spike:18:cli` in another
+**Artifact:** `docs/spike-artifacts/spike-18.json`
+
+### What this is
+Five independent OS processes (Planner, Researcher 1, Researcher 2, Critic, Synthesizer), each running its own AXL node on the laptop, each signing its own on-chain transactions with its own operator wallet, each calling 0G Compute under its own funded ledger. Coordinated end-to-end over Yggdrasil overlay messaging. The Bounty contract on 0G atomically fires a LayerZero V2 message to Base on synthesis.
+
+### Topology
+
+```
+                axl-node-planner  (TLS :9201, api :9101)
+                       △
+        ┌──────────────┼──────────────┐
+        │              │              │
+  axl-node-r1     axl-node-critic   axl-node-synth
+  (api :9102)     (api :9104)       (api :9105)
+
+  axl-node-r2  (api :9103) — also peers planner
+
+5 separate OS processes (one per agent) connect to their own AXL HTTP API.
+Yggdrasil overlay routes between non-adjacent peers via the spanning tree;
+broadcasts iterate a static peer-id list (env-injected) so messages reach
+every agent regardless of tree-update propagation timing.
+```
+
+### Successful run — bounty 20
+
+| Stage | When | Tx |
+|---|---|---|
+| createBountyWithSettlement | +0s | `0x84e341ae…` |
+| acceptPlanner (user) | +1s | `0xfd6fe071…` |
+| broadcastSubTasks (planner) | +75s | `0xb372d65f…` |
+| placeBid × 6 (R1+R2 × 3 tasks) | +90-120s | 6 distinct txs from 2 wallets |
+| awardBid × 3 (planner) | +220-235s | 3 distinct txs |
+| submitFindings × 3 (R1, won all 3) | +236-275s | 3 distinct txs |
+| reviewClaim × 3 (critic) | +295-385s | 3 distinct txs |
+| **submitSynthesis (synth) → fires LZ** | **+411s** | **`0xa0e624d4…`** |
+| Status `Completed` | +375s monitored | — |
+
+**LayerZero V2 GUID:** `0x0c6eb88031ea51b3eaa6c6cbb10fab7fcc419eefc4262925ecd29e284985a6ad`
+**Final report root (0G Storage):** `0xc013b49b178d0ce16959ae9716a5891532b655b8783ef19936825f50e8889a22`
+**Total wall-clock:** ~6.5 minutes (one bounty, end-to-end, no orchestrator).
+
+### What had to be solved
+
+- **Per-agent 0G Compute ledgers (D14):** broker enforces a 3 OG minimum per ledger. With 5 agents that's 15 OG locked + 1 OG/agent for sub-account funding. Three additional 5-OG donor wallets covered it. Each runtime now bills inference under its own wallet — no shared inference identity.
+- **`bountyAddress` propagation:** the user CLI sends `bounty.broadcast` directly to the planner peer. Researchers / critic / synth never see it, so they don't know the Bounty contract address. Fix: planner re-emits `subtask.broadcast` with `bountyAddress` attached, and the other roles cache it on receipt.
+- **Static peer list for broadcast:** Yggdrasil's `/topology` returns a partial spanning tree from each leaf node — planner sees all 4 children, but children only see planner + maybe one sibling. AXLMessagingProvider now accepts a `staticPeers` config (env-injected list of all 5 agent pubkeys) and uses it for broadcast iteration, bypassing tree-convergence timing.
+- **`BID_WINDOW_MS = 120 s`:** each researcher places 3 sequential placeBids of ~10-15 s each; window is sized so awards don't fire before the on-chain bids are visible.
+
+### What this proves for the submission
+
+The "five specialist iNFT agents" claim is now five OS processes, with five operator wallets each having a distinct on-chain identity, distinct chain transactions (16 txs from 5 different signers in this run), and distinct 0G Compute ledger entries. The choreography runs over real AXL inter-process messaging (not in-process). No single coordinator owns the cross-chain payout — the Bounty contract dispatches it itself.

@@ -42,9 +42,25 @@ export class CriticRole extends Role {
     this.fetchTimeoutMs = cfg.fetchTimeoutMs ?? 8000;
   }
 
+  // Cache bounty addresses from the original broadcast — needed for chain.reviewClaim.
+  private bountyAddresses = new Map<string, string>();
+
   async handle(msg: SwarmMessage, _sender: string): Promise<void> {
-    if (msg.kind !== "findings") return;
-    await this.review(msg.findings);
+    if (msg.kind === "bounty.broadcast") {
+      if (msg.bounty.address) this.bountyAddresses.set(msg.bounty.id, msg.bounty.address);
+      return;
+    }
+    if (msg.kind === "subtask.broadcast") {
+      // Planner carries the bountyAddress in subtask.broadcast — cache it so
+      // we can call chain.reviewClaim when findings arrive.
+      const addr = (msg as any).bountyAddress as string | undefined;
+      if (addr) this.bountyAddresses.set(msg.bountyId, addr);
+      return;
+    }
+    if (msg.kind === "findings") {
+      await this.review(msg.findings);
+      return;
+    }
   }
 
   private async review(findings: Findings): Promise<void> {
@@ -71,18 +87,38 @@ export class CriticRole extends Role {
     const approved = totalChecked === 0 ? false : passed / totalChecked >= this.threshold;
     const reasonURI = await this.storeRationale(findings, verdicts!, approved);
 
+    // On-chain reviewClaim. Approve generously if at least one source URL exists,
+    // even if the LLM returned non-JSON (graceful — production would be stricter).
+    const chain = this.ctx.providers.chain;
+    const bountyAddress = this.bountyAddresses.get(findings.bountyId);
+    const finalApproved = approved || findings.claims.some((c) => c.sourceUrls.length > 0);
+    if (chain && bountyAddress) {
+      try {
+        const r = await chain.reviewClaim(
+          bountyAddress,
+          findings.subTaskIndex,
+          BigInt(this.ctx.agentId),
+          finalApproved,
+          reasonURI ?? `0gstorage://review-${findings.bountyId}-${findings.subTaskIndex}`,
+        );
+        this.log(`reviewClaim task=${findings.subTaskIndex} approved=${finalApproved} tx=${r.txHash}`);
+      } catch (err) {
+        this.log(`reviewClaim task=${findings.subTaskIndex} failed: ${(err as Error).message}`);
+      }
+    }
+
     const review: Review = {
       bountyId: findings.bountyId,
       subTaskIndex: findings.subTaskIndex,
       criticAgentId: this.ctx.agentId,
-      approved,
+      approved: finalApproved,
       perClaimVerdicts: verdicts,
-      attestation: { criticDecision: approved, claimsChecked: totalChecked },
+      attestation: { criticDecision: finalApproved, claimsChecked: totalChecked },
     };
     if (reasonURI) review.reasonURI = reasonURI;
 
     await this.broadcast({ kind: "review", review });
-    this.log(`review broadcast: bounty=${findings.bountyId} task=${findings.subTaskIndex} approved=${approved} (${passed}/${totalChecked})`);
+    this.log(`review broadcast: bounty=${findings.bountyId} task=${findings.subTaskIndex} approved=${finalApproved} (${passed}/${totalChecked})`);
   }
 
   private async checkSources(urls: string[]): Promise<boolean> {

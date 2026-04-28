@@ -149,6 +149,109 @@ export interface ReputationProvider {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  Chain adapter (on-chain Bounty state-machine ops)
+// ─────────────────────────────────────────────────────────────
+
+export interface ChainTxResult {
+  txHash: string;
+}
+
+export interface ChainPayoutPreview {
+  recipients: string[];
+  amounts: bigint[];
+}
+
+export interface ChainSubmitSynthesisResult extends ChainTxResult {
+  /** LayerZero V2 message GUID emitted by the Bounty (when wired). */
+  lzGuid: string | null;
+  /** LayerZero nonce. */
+  lzNonce: bigint | null;
+  /** msg.value paid as native fee. */
+  lzFeePaid: bigint;
+  /** Payouts dispatched (parsed from PayoutDispatched event). */
+  recipients: string[];
+  amounts: bigint[];
+}
+
+/**
+ * On-chain coordination layer. Each agent runtime owns one ChainAdapter
+ * backed by its own operator wallet — so role.handle(...) can call
+ * chain.placeBid(...) directly without orchestrator routing.
+ */
+export interface ChainAdapter {
+  readonly name: string;
+
+  /** Address of the wallet signing on behalf of this agent. */
+  readonly signerAddress: string;
+
+  /** Convenience: read the current Bounty status (0..7). */
+  bountyStatus(bountyAddress: string): Promise<number>;
+
+  /** Read final report root after Completed. */
+  bountyFinalReportRoot(bountyAddress: string): Promise<string>;
+
+  /** Read previewPayouts (recipients + amounts) before synthesis. */
+  bountyPreviewPayouts(bountyAddress: string): Promise<ChainPayoutPreview>;
+
+  /** Quote LZ V2 native fee for a synthesis dispatch. */
+  quoteSynthesisLzFee(
+    bountyAddress: string,
+    bountyId: bigint,
+    recipients: string[],
+    amounts: bigint[],
+  ): Promise<bigint>;
+
+  // ----- State-machine transitions -----
+
+  acceptPlanner(bountyAddress: string, plannerAgentId: bigint): Promise<ChainTxResult>;
+
+  broadcastSubTasks(bountyAddress: string, descriptions: string[]): Promise<ChainTxResult>;
+
+  placeBid(
+    bountyAddress: string,
+    subTaskIndex: number,
+    agentId: bigint,
+    price: bigint,
+    reputationSnapshot: bigint,
+  ): Promise<ChainTxResult>;
+
+  awardBid(
+    bountyAddress: string,
+    subTaskIndex: number,
+    agentId: bigint,
+  ): Promise<ChainTxResult>;
+
+  submitFindings(
+    bountyAddress: string,
+    subTaskIndex: number,
+    agentId: bigint,
+    findingsRoot: string,
+  ): Promise<ChainTxResult>;
+
+  reviewClaim(
+    bountyAddress: string,
+    subTaskIndex: number,
+    criticAgentId: bigint,
+    approved: boolean,
+    reasonURI: string,
+  ): Promise<ChainTxResult>;
+
+  /**
+   * Synthesizer's terminal call. The Bounty contract is `payable` at
+   * `submitSynthesis`; if a messenger is wired, it atomically dispatches
+   * `notifyCompletion` over LayerZero V2 in the same tx as the status flip
+   * to Completed. `lzFeeWei` should equal `quoteSynthesisLzFee()` exactly
+   * (OApp `_payNative` rejects buffers).
+   */
+  submitSynthesisAndFireLZ(
+    bountyAddress: string,
+    synthesizerAgentId: bigint,
+    reportRoot: string,
+    lzFeeWei: bigint,
+  ): Promise<ChainSubmitSynthesisResult>;
+}
+
+// ─────────────────────────────────────────────────────────────
 //  Composite — what an Agent runtime needs
 // ─────────────────────────────────────────────────────────────
 
@@ -159,4 +262,5 @@ export interface AgentProviders {
   payment?: PaymentProvider; // not every role calls payment
   retrieval?: RetrievalProvider; // researchers need this
   reputation?: ReputationProvider;
+  chain?: ChainAdapter; // multi-process runtimes wire one per agent
 }

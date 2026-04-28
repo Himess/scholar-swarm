@@ -80,6 +80,8 @@ export const BountySchema = z.object({
   budgetUnits: z.string(), // bigint as decimal string
   subTasks: z.array(z.string()).min(1),
   storageRoot: z.string().optional(),
+  /** Deployed Bounty contract address (multi-process flow needs it for chain calls). */
+  address: z.string().optional(),
 });
 export type Bounty = z.infer<typeof BountySchema>;
 
@@ -102,7 +104,14 @@ export type Report = z.infer<typeof ReportSchema>;
 /** Generic message envelope traveling on the messaging provider. */
 export type SwarmMessage =
   | { kind: "bounty.broadcast"; bounty: Bounty }
-  | { kind: "subtask.broadcast"; bountyId: string; subTaskIndex: number; description: string }
+  | {
+      kind: "subtask.broadcast";
+      bountyId: string;
+      subTaskIndex: number;
+      description: string;
+      /** Deployed Bounty contract address — included so non-planner agents can do chain ops without needing the prior bounty.broadcast. */
+      bountyAddress?: string;
+    }
   | { kind: "bid"; bid: Bid }
   | { kind: "bid.awarded"; bountyId: string; subTaskIndex: number; agentId: string; priceUnits: string }
   | { kind: "findings"; findings: Findings }

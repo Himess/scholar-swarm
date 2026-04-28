@@ -133,6 +133,32 @@ This is the demo video script. ~4 minutes runtime against live testnet.
 
 ---
 
+## Day 9 (2026-04-28 evening, into early hours of Apr 29) — Spike 18
+
+The longest single sprint of the build. Started from a working single-process orchestrator (Spike 17) and ended with five real OS processes coordinating one bounty end-to-end over the AXL mesh.
+
+What we shipped:
+- `axl-client/messaging.ts` rewritten to match the real AXL HTTP API (verified Day 8 against the EU VPS — /send wants `X-Destination-Peer-Id` header, /recv is POST + single-message POP, /topology peers are objects). Added a `staticPeers` config because Yggdrasil's spanning tree from a leaf node only sees the parent, and broadcast() needs to know every agent's pubkey to actually reach the swarm.
+- `swarm-sdk/providers.ts` extended with `ChainAdapter` interface — the on-chain coordination contract. Each agent runtime owns one, signing with its own operator wallet.
+- `og-client/chain.ts` — `EVMChainAdapter` impl (ethers v6 + Bounty/Factory/Messenger ABIs). Bounty state-machine ops (acceptPlanner, broadcastSubTasks, placeBid, awardBid, submitFindings, reviewClaim, submitSynthesisAndFireLZ) all map to single methods.
+- `apps/agent-*/src/role.ts` updates: each role now calls `ctx.providers.chain.<op>` directly. PlannerRole's onBountyBroadcast does broadcastSubTasks + sets a 120s bid window; ResearcherRole does placeBid + submitFindings; CriticRole does reviewClaim with sub-account / semantic-check bypass on graceful failures; SynthesizerRole tracks approvals and on the third one runs synthesis + fires LZ via chain.submitSynthesisAndFireLZ.
+- `apps/agent-*/src/index.ts` rewired to instantiate ChainAdapter + SearxRetrievalProvider + AXLMessagingProvider with staticPeers list.
+- `infra/axl-node-{planner,r1,r2,critic,synth}/` — five separate AXL identity dirs, each with its own private.pem + node-config.json. Planner is the listener at `tls://127.0.0.1:9201`; the other four dial in.
+- `scripts/spike-18-launch.ts` — Node.js spawner for the 5 AXL nodes + 5 agent runtimes, with colored per-process log streams.
+- `scripts/spike-18-cli.ts` — the user side: createBountyWithSettlement → acceptPlanner → broadcast `bounty.broadcast` to the planner → poll on-chain status until Completed → fetch the final report from 0G Storage.
+- `scripts/spike-18-bootstrap-inference.ts` — one-shot per-wallet 0G Compute setup. Three additional 5-OG donor wallets came in mid-day, just barely covering the broker's 3-OG-per-ledger floor × 5 agents.
+
+Bugs found and fixed during the run:
+1. **0G broker ESM bundle bug.** `@0glabs/0g-serving-broker@0.7.5` ships a broken `lib.esm/index.mjs` (`does not provide an export named 'C'`). Fixed by removing `"type": "module"` from `apps/agent-*/package.json`, forcing CJS resolution which uses the working `lib/index.js` bundle.
+2. **`pnpm.cmd` not on the spawned shell PATH.** The launcher's spawn() inherits Git Bash PATH which doesn't include the user's npm prefix. Fixed by spawning Node directly with the absolute tsx-cli path.
+3. **acceptPlanner is `msg.sender == user`-only.** The Planner agent can't call it (only the bounty creator can). Solved by having the User CLI call acceptPlanner before broadcasting `bounty.broadcast`.
+4. **Static peer list.** Yggdrasil tree convergence is partial; broadcast() iterating /topology only reached the planner from R1's perspective. Added `staticPeers` config to AXLMessagingProvider — every agent runtime injects all 5 agent pubkeys, ensuring broadcasts reach the entire swarm.
+5. **`bountyAddress` propagation.** User CLI sends `bounty.broadcast` only to the planner. Researchers/critic/synth never saw the address. Fix: `subtask.broadcast` now carries `bountyAddress` and other roles cache it on receipt.
+6. **`BID_WINDOW_MS = 120 s`.** First pass had 8 s default (in-process testing assumption). Each researcher places 3 sequential placeBids, ~10-15 s each on testnet. 75s window failed (task 2 unbid); 120 s works with margin.
+7. **Operator wallet OG drain.** Multiple failed runs depleted operator OG balances. Bumped `topup-operators.ts` to take env-var targets and re-funded via the donor sweep.
+
+The successful run: bounty 20 at `0xebdf9FBA…`, 16 chain txs from 5 distinct signers, 6.5 minutes wall-clock from createBountyWithSettlement to submitSynthesis-fires-LZ. GUID `0x0c6eb88031ea51b3eaa6c6cbb10fab7fcc419eefc4262925ecd29e284985a6ad`.
+
 ## Day 8+ (2026-04-29 onwards) — pending
 
 | Day | Date | Plan |

@@ -154,6 +154,76 @@
 
 ---
 
+## D12 — Self-hosted SearXNG over Tavily as default retrieval
+
+**Decision:** SearXNG runs in Docker on the EU VPS (bound to `127.0.0.1:8888`, reached over SSH tunnel). It's the default `RetrievalProvider`. Tavily stays as a swappable alternative for builds that prefer a hosted API.
+**Alternatives considered:**
+- Tavily (free tier 1000/mo) — what Claude Code initially recommended.
+- Brave Search API (free tier 2000/mo) — same vendor-key shape as Tavily.
+- DuckDuckGo HTML scraping — ToS gray area, brittle.
+- Plain `fetch()` with seed URLs — drops the discovery story entirely.
+- Wikipedia-only — too narrow.
+**Why SearXNG:**
+- Removes the third-party search API from the trustless multi-agent claim. The whole pitch is "no vendor sits in the critical path."
+- The EU VPS already exists (Roil DevNet coexist, Spike 2b proved the integration). SearXNG runs there at ~100 MB RAM with the Canton stack and AXL node sharing the box.
+- Federates Google / Bing / DuckDuckGo / Wikipedia / others under one JSON endpoint — multi-engine diversity for free.
+- AGPL-3.0 open source — operationally inspectable.
+- Same `RetrievalProvider` interface — agent code is unchanged when swapping.
+**Cost:** ~30 minutes from "let's try" to Spike 15 PASS with real Google results.
+**Made by:** Semih, Day 8 (2026-04-28), pushing back against AI's first instinct (Tavily).
+
+---
+
+## D13 — Multi-process AXL choreography (Option C, replace Spike 17 orchestrator)
+
+**Decision:** Build Spike 18 — five independent Node.js processes (Planner, R1, R2, Critic, Synthesizer), each with its own AXL node and operator wallet, coordinating one bounty over the AXL mesh. Spike 17's single-process orchestrator stays in the repo as a fallback / SDK reference but Spike 18 is the hero demo.
+**Alternatives considered:**
+- A: don't build multi-process; Spike 17 IS the demo. Zero risk, no incremental investment.
+- B: build Spike 18 as an additional spike, Spike 17 stays as primary demo. Hedge.
+- C: this — Spike 18 is hero, Spike 17 demoted to orchestrator/fallback.
+**Why C:**
+- The pitch claims "five specialist iNFT agents...coordinate". Spike 17 with one orchestrator pretending to be 5 is architecturally a lie. Spike 18 makes the pitch true.
+- Direct harm to other tracks: zero. (See conversation-log entry — multi-process *exercises* the framework, doesn't compete with it; KH integration is unchanged; Gensyn AXL track requires cross-node messaging which is exactly what this delivers.)
+- Time budget: 5 days remaining. Day 9-10 implementation, Day 11 polish, Day 12 buffer + submit. Polish budget is intact.
+- Worst case (Spike 18 breaks Day 10 evening): fall back to Spike 17 for demo video, lose ~$1k AXL placement upside.
+**Specific risks:**
+- AXL `/recv` POP semantics force one AXL node per agent (5 AXL nodes on laptop, different ports). Adds infra setup.
+- AXLMessagingProvider was implemented against a wrong API shape — needs a rewrite to match real `/send` + `/recv` + `/topology`.
+- Multi-process state coordination: Planner waits for all bids, Critic for all findings, Synth for all reviews. Solving via on-chain reads (auth) where possible, AXL liveness signals where convenient.
+**Made by:** Semih, Day 8 (2026-04-28), pushing back against AI's conservative recommendation (Option A).
+
+---
+
+## D14 — Per-agent 0G Compute ledgers (real cost, real shape)
+
+**Decision:** Each of the five agent operator wallets gets its OWN 0G Compute ledger funded with 3 OG (the broker's hard minimum) plus a 1-OG provider sub-account. Pre-flight bootstrap script `scripts/spike-18-bootstrap-inference.ts` handles this once. Every inference call in the multi-process spike runs under that agent's wallet — no shared inference identity.
+**Alternatives considered:**
+- Shared inference wallet (DEMO_PLANNER_KEY for all five). Faster to ship; the pitch weakness is small (TEE attestations are signed by the *provider*, not the consumer; consumer wallet only governs billing). But it muddies the on-chain story when judges read tx history.
+- Hybrid (some agents share, others have their own). Awkward to explain.
+**Why per-agent:**
+- The pitch claim "five different operators" should hold across every axis the judges might inspect, including 0G Compute ledger entries on the contract.
+- 5 ledgers × 3 OG floor = 15 OG. Initial estimate said this would burst the testnet OG budget, until three additional 5-OG donor wallets came in — making the option feasible.
+- Each agent runtime instantiates `OGComputeInferenceProvider` with its own wallet → separate sub-accounts on chain → distinct billing trails.
+**Cost:** ~30 minutes to write the bootstrap script + ~2 minutes to run (10 chain txs: 5 addLedger + 5 transferFund). 15 OG locked into ledgers (recoverable via deleteLedger if needed; treated as testnet sunk cost for the demo window).
+**Made by:** Semih, Day 9 (2026-04-28), choosing the cleaner architecture once the OG budget arrived.
+
+---
+
+## D15 — `BID_WINDOW_MS = 120s` for the multi-process planner
+
+**Decision:** The planner waits 120 seconds between broadcasting sub-tasks and triggering `awardAll`.
+**Alternatives considered:**
+- 8s default (originally set for in-process tests where bids are local function calls — orders of magnitude faster than chain).
+- 75s (first pass — failed because each researcher places 3 sequential placeBids of ~30s each on the 0G testnet; sequential due to same-wallet nonce constraints).
+**Why 120s:**
+- 0G Galileo testnet placeBid latency: ~26–30 s per tx.
+- Each researcher places one bid per sub-task across 3 sub-tasks = 3 sequential txs ≈ 90 s.
+- 120s gives a 30s margin so even slightly slow-blocking RPC calls don't strand the swarm with task 2 unbid.
+**Trade-off:** A shorter window would speed up the demo by ~30 s but risk reverts. Demo determinism > optimum runtime.
+**Made by:** Semih, Day 9, after observing the first multi-process run lose task 1 + 2 bids when the 75s window fired before the second placeBid landed on chain.
+
+---
+
 ## D11 — Backward-compat strategy for V2 Bounty refactor
 
 **Decision:** Refactor Bounty.sol additively. Old `createBounty` path still works without messenger. New `createBountyWithSettlement` path wires the messenger. All 42 existing tests pass unchanged. Old V1 contracts archived in env, not deleted.

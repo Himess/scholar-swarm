@@ -57,8 +57,25 @@ export class PlannerRole extends Role {
     if (this.bounties.has(bounty.id)) return; // idempotent
     this.log(`accepting bounty ${bounty.id}: "${bounty.goal.slice(0, 80)}"`);
 
+    // Note: acceptPlanner is the USER's call (only msg.sender == user can do
+    // it). The CLI is expected to have already called it before sending us
+    // bounty.broadcast. We start at status=Planning and head straight to
+    // broadcastSubTasks.
+
+    const chain = this.ctx.providers.chain;
     const { subTasks, attestation } = await this.decompose(bounty);
     this.log(`decomposed into ${subTasks.length} sub-tasks`);
+
+    // 2. On-chain: persist sub-task descriptions (transitions Planning → Bidding).
+    if (chain && bounty.address) {
+      try {
+        const r = await chain.broadcastSubTasks(bounty.address, subTasks);
+        this.log(`broadcastSubTasks tx ${r.txHash}`);
+      } catch (err) {
+        this.log(`broadcastSubTasks failed: ${(err as Error).message}`);
+        return;
+      }
+    }
 
     this.bounties.set(bounty.id, {
       bounty,
@@ -69,15 +86,20 @@ export class PlannerRole extends Role {
       attestation,
     });
 
+    // 3. AXL: signal sub-tasks to researchers. Include bountyAddress so non-
+    // planner agents can do their own chain ops without seeing the original
+    // bounty.broadcast (which the user CLI sends point-to-point to us).
     for (let i = 0; i < subTasks.length; ++i) {
       const subTaskItem = subTasks[i];
       if (!subTaskItem) continue;
-      await this.broadcast({
+      const msg: any = {
         kind: "subtask.broadcast",
         bountyId: bounty.id,
         subTaskIndex: i,
         description: subTaskItem,
-      });
+      };
+      if (bounty.address) msg.bountyAddress = bounty.address;
+      await this.broadcast(msg);
     }
 
     setTimeout(() => {
@@ -100,12 +122,27 @@ export class PlannerRole extends Role {
     if (!state) return;
     state.bidWindowOpen = false;
 
+    const chain = this.ctx.providers.chain;
+    const bountyAddress = state.bounty.address;
+
     for (let i = 0; i < state.bids.length; ++i) {
       const winner = this.pickWinner(state.bids[i] ?? []);
       if (!winner) {
         this.log(`no bids for sub-task ${i} — bounty ${bountyId} stuck`);
         continue;
       }
+
+      // On-chain award (transitions to Researching after the third).
+      if (chain && bountyAddress) {
+        try {
+          const r = await chain.awardBid(bountyAddress, i, BigInt(winner.agentId));
+          this.log(`awardBid task=${i} agent=${winner.agentId} tx=${r.txHash}`);
+        } catch (err) {
+          this.log(`awardBid task=${i} failed: ${(err as Error).message}`);
+          continue;
+        }
+      }
+
       state.awarded[i] = winner.agentId;
       await this.broadcast({
         kind: "bid.awarded",

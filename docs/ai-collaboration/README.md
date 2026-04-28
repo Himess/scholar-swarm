@@ -12,6 +12,7 @@ This folder is the audit trail for ETHGlobal's AI usage requirement: **AI tools 
 | [`claude-code-feedback-v2.md`](./claude-code-feedback-v2.md) | Claude Code (recorded by Semih) | Acknowledgment of v2 fixes + remaining concerns |
 | [`decision-log.md`](./decision-log.md) | **Semih** | Architectural decisions — why each was made, by whom |
 | [`day-by-day-notes.md`](./day-by-day-notes.md) | Semih (chronological summary) | What happened each day, what blocked, what unblocked |
+| [`conversation-log.md`](./conversation-log.md) | Semih (narrative, post-hoc edited) | Substance of major design discussions with Claude Code — pivots, debugging, trade-offs |
 
 ## How AI was used
 

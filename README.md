@@ -12,7 +12,7 @@ Three mechanisms make the difference:
 3. **TEE-attested inference.** Every LLM call runs on 0G Compute inside a dstack TEE. The signed attestation proves *which model produced what*, replayable by any third party.
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 8 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **17/17 spikes PASS** with on-chain or live-network proofs · cross-chain payout loop closes end-to-end (Bounty → LZ V2 → KeeperHub workflow → Base USDC) · cross-ISP AXL mesh live (TR laptop ↔ EU VPS, bidirectional Yggdrasil round-trip) · self-hosted SearXNG retrieval running on the same VPS — proven by [Spike 17 full E2E](#spike-results), [Spike 2b cross-ISP](#spike-results), and [Spike 15 retrieval](#spike-results).
+**Status (Day 9 / 2026-04-28):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **18/18 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
 
 ---
 
@@ -102,7 +102,8 @@ The SDK is what other teams could fork to build their own swarms — code-review
 | iNFT royalty split (95/5 owner/creator) | ✅ live | 0.002 OG paid + on-chain split observed — [Spike 10 PASS](#spike-results) |
 | Full Bounty lifecycle E2E (16 txs, 6 signers) | ✅ live | bountyId 2 at `0x4a6FE339…F0f2`, all state transitions on-chain — [Spike 11 PASS](#spike-results) |
 | **Bounty.submitSynthesis fires LZ atomically** | ✅ live | V2 factory + payable submitSynthesis — GUID `0x6cfdf46b…` — [Spike 16 PASS](#spike-results) |
-| **Full E2E** (SearXNG retrieval + 0G inference + 0G storage + bounty + LZ V2 + KH) | ✅ live | One script (`pnpm spike:17`), real Google sources via self-hosted SearXNG, 7 attested inferences, 7 storage refs, GUID `0x83e18d89…` — [Spike 17 PASS](#spike-results) |
+| **Full E2E** (single-process orchestrator) | ✅ live | One script (`pnpm spike:17`), real Google sources via self-hosted SearXNG, 7 attested inferences, 7 storage refs, GUID `0x83e18d89…` — [Spike 17 PASS](#spike-results) |
+| **Multi-process choreography** (5 processes, 5 AXL nodes, 5 ledgers) | ✅ live | 5 OS processes coordinated bounty 20 end-to-end. 16 chain txs from 5 distinct operator wallets. Synth fires LZ V2 atomically — GUID `0x0c6eb880…` — [Spike 18 PASS](#spike-results) |
 | Cross-machine mesh (laptop TR ⇄ EU VPS) | ✅ live | Bidirectional `/send` ↔ `/recv` over Yggdrasil TLS round-trip, both peers in spanning tree — [Spike 2b PASS](#spike-results) |
 
 ---
@@ -262,7 +263,8 @@ Each spike is a small standalone script that verifies one architectural assumpti
 | 14 | KH `create_workflow` (live) | ✅ PASS | Workflow id [`nepsavmovlyko0luy3rpi`](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) persisted on the org. |
 | 15 | Retrieval (SearXNG / Tavily, swappable) | ✅ PASS | Self-hosted SearXNG on the EU VPS reachable via SSH tunnel; 5 real Google results in 1.3s, top URL re-fetched HTTP 200 (Critic verification path). |
 | 16 | **Bounty.submitSynthesis fires LZ atomically (V2)** | ✅ PASS | V2 factory + payable submitSynthesis dispatches `notifyCompletion` in one tx — GUID `0x6cfdf46b…`. |
-| 17 | **Full E2E** | ✅ PASS | Single script: 7 attested 0G inferences + 7 0G Storage refs + bounty lifecycle + LZ V2 — GUID `0x82fcb3f2…`. |
+| 17 | **Full E2E** (single-process orchestrator) | ✅ PASS | Single script: 7 attested 0G inferences + 7 0G Storage refs + bounty lifecycle + LZ V2 — GUID `0x82fcb3f2…`. |
+| 18 | **Multi-process choreography** | ✅ PASS | 5 OS processes / 5 AXL nodes / 5 0G Compute ledgers / 5 operator wallets. 16 distinct chain txs from 5 signers in one bounty. Synth fires LZ V2 atomically — GUID `0x0c6eb880…`. |
 
 Full artifacts: [`docs/spike-artifacts/`](./docs/spike-artifacts/).
 
@@ -345,7 +347,9 @@ pnpm spike:09   # LayerZero V2 0G→Base
 pnpm spike:14   # KeeperHub create_workflow live on org
 pnpm spike:15   # Retrieval — picks SearXNG (SEARXNG_ENDPOINT) or Tavily (TAVILY_API_KEY)
 pnpm spike:16   # Bounty.submitSynthesis fires LZ atomically
-pnpm spike:17   # FULL E2E — one script, real providers, real cross-chain
+pnpm spike:17   # E2E orchestrator — one script, real providers, real cross-chain
+pnpm spike:18   # Multi-process choreography — runs 5 AXL nodes + 5 agents
+# (in another terminal) pnpm spike:18:cli  # post a bounty + observe the swarm
 
 pnpm mint:agents   # mint the 5 iNFTs to your wallet
 

@@ -12,12 +12,18 @@ import type { Findings, Report, RoleId, SwarmMessage } from "@scholar-swarm/sdk"
 
 interface BountyAccumulator {
   approved: Map<number, Findings>;
+  reviewedApproved: Set<number>;
   expectedSubTasks: number;
+  bountyAddress?: string;
+  bountyIdNum?: bigint;
+  fired: boolean;
 }
 
 export interface SynthesizerConfig {
   /** How many sub-tasks per bounty (must match Planner). Default 3. */
   expectedSubTasks?: number;
+  /** Synthesizer fee in token base units (e.g. 100 USDC = 100_000_000n with 6 decimals). */
+  synthFeeBaseUnits?: bigint;
 }
 
 const SYNTHESIZE_SYSTEM = `You are the Synthesizer agent in Scholar Swarm.
@@ -43,24 +49,58 @@ export class SynthesizerRole extends Role {
 
   private accumulators = new Map<string, BountyAccumulator>();
   private expectedSubTasks: number;
+  private synthFeeBaseUnits!: bigint;
 
   constructor(cfg: SynthesizerConfig = {}) {
     super();
     this.expectedSubTasks = cfg.expectedSubTasks ?? 3;
+    this.synthFeeBaseUnits = cfg.synthFeeBaseUnits ?? 100_000_000n;
   }
 
   async handle(msg: SwarmMessage, _sender: string): Promise<void> {
-    if (msg.kind === "review" && msg.review.approved) {
-      // Pair the review with the findings via a separate findings cache. Simplest:
-      // request from the bus by listening for findings too.
-      // For Phase 3 we trigger synthesis when the bus announces approved
-      // findings via "synthesis.request" coming from the Critic, OR when we've
-      // accumulated findings from "findings" messages and reviews approved them.
-      return; // we react to synthesis.request below
+    if (msg.kind === "bounty.broadcast") {
+      const bid = msg.bounty.id;
+      const acc = this.ensureAcc(bid);
+      if (msg.bounty.address) acc.bountyAddress = msg.bounty.address;
+      try {
+        acc.bountyIdNum = BigInt(bid);
+      } catch {
+        /* string id, leave undefined */
+      }
+      return;
+    }
+
+    if (msg.kind === "subtask.broadcast") {
+      // Planner sends bountyAddress here — cache it for the synth tx later.
+      const addr = (msg as any).bountyAddress as string | undefined;
+      const acc = this.ensureAcc(msg.bountyId);
+      if (addr && !acc.bountyAddress) acc.bountyAddress = addr;
+      if (acc.bountyIdNum === undefined) {
+        try {
+          acc.bountyIdNum = BigInt(msg.bountyId);
+        } catch {
+          /* string id */
+        }
+      }
+      return;
     }
 
     if (msg.kind === "findings") {
       this.cacheFinding(msg.findings);
+      return;
+    }
+
+    if (msg.kind === "review" && msg.review.approved) {
+      const acc = this.ensureAcc(msg.review.bountyId);
+      acc.reviewedApproved.add(msg.review.subTaskIndex);
+      this.log(
+        `review approved cached: bounty=${msg.review.bountyId} task=${msg.review.subTaskIndex} ` +
+          `(${acc.reviewedApproved.size}/${acc.expectedSubTasks})`,
+      );
+      // When all sub-tasks are approved, run synthesis + fire LZ on chain.
+      if (acc.reviewedApproved.size >= acc.expectedSubTasks && !acc.fired) {
+        await this.runFullSynthesis(msg.review.bountyId);
+      }
       return;
     }
 
@@ -70,16 +110,109 @@ export class SynthesizerRole extends Role {
     }
   }
 
-  private cacheFinding(findings: Findings): void {
-    if (!this.accumulators.has(findings.bountyId)) {
-      this.accumulators.set(findings.bountyId, {
+  private ensureAcc(bountyId: string): BountyAccumulator {
+    if (!this.accumulators.has(bountyId)) {
+      this.accumulators.set(bountyId, {
         approved: new Map(),
+        reviewedApproved: new Set(),
         expectedSubTasks: this.expectedSubTasks,
+        fired: false,
       });
     }
-    // We don't approve here — Critic's role. Just remember the findings so when
-    // we're handed an explicit synthesis.request we have the body ready.
-    this.accumulators.get(findings.bountyId)!.approved.set(findings.subTaskIndex, findings);
+    return this.accumulators.get(bountyId)!;
+  }
+
+  private cacheFinding(findings: Findings): void {
+    const acc = this.ensureAcc(findings.bountyId);
+    acc.approved.set(findings.subTaskIndex, findings);
+  }
+
+  /**
+   * Multi-process flow: synth runs the report and fires LZ V2 atomically
+   * via chain.submitSynthesisAndFireLZ. Triggered when all 3 reviews
+   * approve.
+   */
+  private async runFullSynthesis(bountyId: string): Promise<void> {
+    const acc = this.accumulators.get(bountyId);
+    if (!acc || acc.fired) return;
+    acc.fired = true;
+
+    const findings = Array.from(acc.approved.values()).sort((a, b) => a.subTaskIndex - b.subTaskIndex);
+    if (findings.length === 0) {
+      this.log(`runFullSynthesis: no findings cached for ${bountyId}`);
+      acc.fired = false;
+      return;
+    }
+
+    // Compose report (same as synthesize() below, then anchor on chain).
+    const userPrompt = this.composePrompt(bountyId, findings);
+    const res = await this.ctx.providers.inference.infer({
+      messages: [
+        { role: "system", content: SYNTHESIZE_SYSTEM },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.4,
+      maxTokens: 1500,
+    });
+    const parsed = parseReportJSON(res.content) ?? {
+      body: res.content,
+      citations: [],
+    };
+
+    const report: Report = {
+      bountyId,
+      synthesizerAgentId: this.ctx.agentId,
+      body: parsed.body,
+      citations: parsed.citations,
+      attestation: res.attestation,
+    };
+
+    let reportRoot: string | null = null;
+    try {
+      const ref = await this.ctx.providers.storage.putJSON(report);
+      reportRoot = ref.id;
+      this.log(`report stored at ${ref.uri ?? ref.id}`);
+    } catch (err) {
+      this.log(`storage put failed: ${(err as Error).message}`);
+      acc.fired = false;
+      return;
+    }
+
+    // Fire LZ via on-chain submitSynthesis.
+    const chain = this.ctx.providers.chain;
+    if (chain && acc.bountyAddress && acc.bountyIdNum !== undefined && reportRoot) {
+      try {
+        const preview = await chain.bountyPreviewPayouts(acc.bountyAddress);
+        // previewPayouts is called BEFORE submitSynthesis runs, so it doesn't
+        // include the synth entry yet. Append it for the LZ quote — the
+        // contract will produce the same final vector.
+        const quoteRecipients = [...preview.recipients, this.ctx.operatorWallet];
+        const quoteAmounts = [...preview.amounts, this.synthFeeBaseUnits];
+
+        const fee = await chain.quoteSynthesisLzFee(
+          acc.bountyAddress,
+          acc.bountyIdNum,
+          quoteRecipients,
+          quoteAmounts,
+        );
+        this.log(`LZ fee quote: ${fee} wei`);
+
+        const result = await chain.submitSynthesisAndFireLZ(
+          acc.bountyAddress,
+          BigInt(this.ctx.agentId),
+          reportRoot,
+          fee,
+        );
+        this.log(`submitSynthesis tx=${result.txHash} guid=${result.lzGuid ?? "(none)"}`);
+      } catch (err) {
+        this.log(`submitSynthesis failed: ${(err as Error).message}`);
+        acc.fired = false;
+        return;
+      }
+    }
+
+    await this.broadcast({ kind: "report.delivered", report });
+    this.log(`report.delivered broadcast for bounty ${bountyId}`);
   }
 
   private async synthesize(bountyId: string, approvedFindings: Findings[]): Promise<void> {
