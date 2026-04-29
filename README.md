@@ -11,8 +11,12 @@ Three mechanisms make the difference:
 2. **Critic verification.** An independent agent fetches each cited URL and runs a separate attested LLM check: *does this excerpt actually support this claim?*
 3. **TEE-attested inference.** Every LLM call runs on 0G Compute inside a dstack TEE. The signed attestation proves *which model produced what*, replayable by any third party.
 
+**🌐 Live demo:** [scholar-swarm.vercel.app](https://scholar-swarm.vercel.app) ([Bounty #20 timeline](https://scholar-swarm.vercel.app/bounty/20) · [iNFT gallery](https://scholar-swarm.vercel.app/agents))
+**📂 Repo:** [github.com/Himess/scholar-swarm](https://github.com/Himess/scholar-swarm)
+**📧 Contact:** [@Himess__ on X](https://twitter.com/Himess__) · [@SemihCivelek on Telegram](https://t.me/SemihCivelek) · semihcvlk53@gmail.com
+
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 10 / 2026-04-29):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
+**Status (Day 11 / 2026-04-30):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
 
 ---
 
@@ -70,9 +74,16 @@ Mint artifact: [`docs/spike-artifacts/minted-agents.json`](./docs/spike-artifact
 
 ---
 
-## Demo video
+## Demo video & live demo
 
-3-min demo records Day 11 (2026-05-02). Script outline: bounty creation → swarm coordination → critic catches a weak source → researcher retries → synthesis → **the contract fires the cross-chain payout itself** → KH workflow distributes USDC on Base → final report with per-claim source attribution. The on-camera run is `pnpm spike:17` against live testnet, with two physical machines (laptop in Türkiye + EU VPS) hosting the AXL mesh — cross-ISP round-trip already verified ([Spike 2b PASS](#spike-results)).
+**Live frontend:** https://scholar-swarm.vercel.app — three-route demo-mode app showing real on-chain state:
+- [`/`](https://scholar-swarm.vercel.app/) — bounty post form
+- [`/bounty/20`](https://scholar-swarm.vercel.app/bounty/20) — full lifecycle timeline for the Spike 18 PASS bounty (5 stages, 17 real on-chain tx hashes, cross-chain payout panel, recipient cards)
+- [`/agents`](https://scholar-swarm.vercel.app/agents) — five iNFT gallery (operator wallets, encrypted intelligence roots, mint + transfer tx)
+
+Frontend source: [`frontend/`](./frontend/) — Next.js 16 + Tailwind + Framer Motion. All addresses, hashes, and explorer links resolve to real testnet entities.
+
+**3-min demo video** records Day 11 (2026-05-02). Script outline: bounty creation → swarm coordination → critic catches a weak source → researcher retries → synthesis → **the contract fires the cross-chain payout itself** → KH workflow distributes USDC on Base → final report with per-claim source attribution. The on-camera run is `pnpm spike:18` against live testnet, with two physical machines (laptop in Türkiye + EU VPS) hosting the AXL mesh — cross-ISP round-trip already verified ([Spike 2b PASS](#spike-results)). Recording procedure + rejection-scene engineering live in [`docs/demo-video/`](./docs/demo-video/).
 
 ---
 
@@ -466,7 +477,13 @@ Commit history is also part of the audit. 22 GPG-signed commits, distributed acr
 
 ## Team
 
-Solo build by **Semih Civelek** ([@Himess](https://github.com/Himess)) from Ordu, Türkiye. 80+ merged PRs across Ethereum OSS (reth, revm, Optimism, Base, Miden). Prior win: Zama Builder Track S1 with MARC.
+Solo build by **Semih Civelek** from Ordu, Türkiye. 80+ merged PRs across Ethereum OSS (reth, revm, Optimism, Base, Miden). Prior win: Zama Builder Track S1 with MARC.
+
+**Contact:**
+- **GitHub:** [@Himess](https://github.com/Himess)
+- **X (Twitter):** [@Himess__](https://twitter.com/Himess__)
+- **Telegram:** [@SemihCivelek](https://t.me/SemihCivelek)
+- **Email:** semihcvlk53@gmail.com
 
 ## License
 
