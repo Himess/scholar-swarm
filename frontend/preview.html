@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scholar Swarm — Next.js project preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0c;--bg-elev:#14141a;--bg-elev-2:#181820;
+    --fg:#f4f4f5;--fg-dim:#a1a1aa;--fg-faint:#52525b;
+    --accent:#ffd166;--mint:#06d6a0;--blue:#60a5fa;
+    --border:#2a2a32;--code-bg:#1a1a22;
+  }
+  html,body{background:var(--bg);color:var(--fg);}
+  body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .kicker{font-family:'JetBrains Mono';font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-faint);}
+  .kicker-sm{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-faint);}
+  .h-display{font-weight:700;letter-spacing:-.025em;line-height:1.02;}
+  .h-tight{letter-spacing:-.02em;line-height:1.05;}
+  .text-fg{color:var(--fg);}.text-dim{color:var(--fg-dim);}.text-faint{color:var(--fg-faint);}
+  .text-accent{color:var(--accent);}.text-mint{color:var(--mint);}.text-blue{color:var(--blue);}
+  .bg-elev{background:var(--bg-elev);}.bg-elev2{background:var(--bg-elev-2);}.bg-code{background:var(--code-bg);}
+  .border-soft{border-color:var(--border);}
+  .logo-tile{background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:8px;}
+  .pill-completed,.pill-paid{background:rgba(6,214,160,.10);border:1px solid rgba(6,214,160,.35);color:var(--mint);}
+  .badge-num{width:22px;height:22px;border-radius:999px;background:var(--accent);color:#1a1306;font-weight:700;font-size:12px;display:grid;place-items:center;}
+  .ext-link{color:var(--fg-dim);transition:color .15s;}.ext-link:hover{color:var(--accent);}
+  .copy-btn{color:var(--fg-faint);transition:color .15s;}.copy-btn:hover{color:var(--fg-dim);}
+  .chip-hover{transition:transform .15s, border-color .2s, background .2s;}
+  .chip-hover:hover{transform:translateY(-2px);border-color:#3a3a44;background:var(--bg-elev-2);}
+  .accent-glow{transition:box-shadow .25s, transform .15s;}
+  .accent-glow:hover{box-shadow:0 0 0 1px rgba(255,209,102,.55),0 18px 60px -12px rgba(255,209,102,.45);transform:translateY(-1px);}
+  .grad-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+  .hero-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(800px 380px at 50% 0%,rgba(255,209,102,.07),transparent 60%),radial-gradient(700px 400px at 80% 30%,rgba(6,214,160,.05),transparent 60%);}
+  textarea,input[type=number]{background:var(--code-bg);color:var(--fg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;width:100%;font-family:Inter;font-size:16px;}
+  textarea{resize:vertical;min-height:120px;}
+  textarea:focus,input:focus{outline:none;border-color:rgba(255,209,102,.6);box-shadow:0 0 0 3px rgba(255,209,102,.12);}
+  details>summary{list-style:none;cursor:pointer;}details>summary::-webkit-details-marker{display:none;}
+  .chev{transition:transform .2s;}details[open] .chev{transform:rotate(90deg);}
+  .lz-arrow{height:2px;background:linear-gradient(90deg,rgba(96,165,250,0),rgba(96,165,250,.9) 30%,rgba(96,165,250,.9) 70%,rgba(96,165,250,0));position:relative;}
+  .lz-arrow::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:8px solid var(--blue);border-top:6px solid transparent;border-bottom:6px solid transparent;}
+  .tl-line{height:2px;background:linear-gradient(90deg,rgba(6,214,160,.6),rgba(6,214,160,1) 50%,rgba(6,214,160,.6));position:relative;overflow:hidden;}
+  .tl-line::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6) 50%,transparent);transform:translateX(-100%);animation:sweep 3.6s linear infinite;}
+  @keyframes sweep{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+  .tl-node{width:32px;height:32px;border-radius:999px;background:var(--mint);display:grid;place-items:center;box-shadow:0 0 0 4px rgba(6,214,160,.18),0 0 24px rgba(6,214,160,.35);}
+  .tl-node-inner{width:10px;height:10px;border-radius:999px;background:#0a0a0c;}
+  .pulse-mint{position:relative;}
+  .pulse-mint::before{content:"";position:absolute;inset:-6px;border-radius:999px;border:1px solid rgba(6,214,160,.5);animation:pulse 1.8s ease-out infinite;}
+  @keyframes pulse{0%{transform:scale(.8);opacity:.9;}100%{transform:scale(1.6);opacity:0;}}
+  .dot{width:8px;height:8px;border-radius:999px;display:inline-block;}
+  .dot-mint{background:var(--mint);box-shadow:0 0 0 4px rgba(6,214,160,.15);}
+  ::selection{background:rgba(255,209,102,.35);color:#fff;}
+  .x-scroll::-webkit-scrollbar{height:8px;}.x-scroll::-webkit-scrollbar-thumb{background:#2a2a32;border-radius:8px;}
+  /* preview tabs */
+  .tab-active{background:var(--bg-elev);color:var(--fg);border-color:var(--border);}
+  .tab-idle{color:var(--fg-dim);border-color:transparent;}
+  .file-pill{font-family:'JetBrains Mono';font-size:11px;color:var(--fg-faint);background:var(--code-bg);padding:3px 8px;border-radius:4px;border:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<!-- Project banner -->
+<div class="border-b border-soft" style="background:#0c0c10;">
+  <div class="max-w-[1640px] mx-auto px-8 py-3 flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-3">
+      <span class="kicker-sm" style="color:var(--mint);">Next.js 15 · App Router</span>
+      <span class="text-faint mono text-[11px]">scholar-swarm-frontend/</span>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="file-pill">app/page.tsx</span>
+      <span class="file-pill">app/bounty/[id]/page.tsx</span>
+      <span class="file-pill">components/Timeline.tsx</span>
+      <span class="file-pill">lib/demo-data.ts</span>
+      <span class="file-pill">+ 4 more</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="border-b border-soft sticky top-0 z-50" style="background:rgba(10,10,12,.92);backdrop-filter:blur(8px);">
+  <div class="max-w-[1640px] mx-auto px-8 flex items-center gap-2">
+    <button onclick="show('post')" id="tab-post" class="tab-active border px-5 py-3 mono text-[12px] uppercase tracking-[.14em] rounded-t-md border-b-0">/ &nbsp; <span class="text-faint">page.tsx</span></button>
+    <button onclick="show('detail')" id="tab-detail" class="tab-idle border px-5 py-3 mono text-[12px] uppercase tracking-[.14em] rounded-t-md border-b-0">/bounty/20 &nbsp; <span class="text-faint">bounty/[id]/page.tsx</span></button>
+    <span class="ml-auto text-faint mono text-[11px] py-3">preview · run <span class="text-fg">pnpm dev</span> for live source</span>
+  </div>
+</div>
+
+<!-- Top nav (shared) -->
+<header class="w-full border-b border-soft" style="height:60px;">
+  <div class="max-w-[1640px] mx-auto h-full px-8 flex items-center justify-between">
+    <a href="#" onclick="show('post');return false;" class="flex items-center gap-3">
+      <span class="inline-grid place-items-center w-7 h-7 rounded-md font-bold" style="background:linear-gradient(135deg,#ffd166,#f4a13d);color:#1a1306;">S</span>
+      <span class="font-semibold tracking-tight">SCHOLAR SWARM</span>
+      <span class="hidden md:inline text-dim text-sm pl-3 ml-1 border-l border-soft">AutoGPT for serious research.</span>
+    </a>
+    <nav class="flex items-center gap-7 mono text-[13px] uppercase tracking-[.14em]">
+      <a href="#" onclick="show('post');return false;" class="ext-link">Explore</a>
+      <a href="#" onclick="show('detail');return false;" class="ext-link">Bounties</a>
+      <a href="#" class="ext-link">Docs</a>
+      <a href="https://github.com/Himess/scholar-swarm" target="_blank" rel="noopener" class="ext-link">Github&nbsp;↗</a>
+    </nav>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer class="w-full border-t border-soft mt-16" style="min-height:60px;">
+  <div class="max-w-[1640px] mx-auto px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="mono text-[12px] text-faint tracking-[.12em] uppercase">15 / 19 spikes drawn from this run · Spike 18 + Spike 19</div>
+    <div class="flex items-center gap-3" id="footer-logos-wrap">
+      <span class="kicker-sm">Built with</span>
+      <div class="flex items-center gap-2" id="footer-logos"></div>
+    </div>
+  </div>
+</footer>
+
+<!-- POST -->
+<template id="tpl-post">
+<section class="relative">
+  <div class="hero-glow"></div>
+  <div class="relative max-w-[1640px] mx-auto px-8 pt-20 pb-10">
+    <div class="text-center mb-7">
+      <div class="kicker mb-5">Post a research bounty</div>
+      <h1 class="h-display" style="font-size:clamp(44px,5.4vw,72px);">
+        <span class="text-fg">Five specialist iNFT agents,</span><br/>
+        <span class="text-accent">one verified report.</span>
+      </h1>
+      <p class="text-dim text-[20px] max-w-[720px] mx-auto mt-6 leading-relaxed">
+        Real source-fetching. Independent critic. TEE-attested inference. Cross-chain payouts in <span class="text-fg font-medium">0.7&nbsp;seconds</span>.
+      </p>
+    </div>
+    <div class="max-w-[800px] mx-auto bg-elev border border-soft rounded-xl p-8" style="box-shadow:0 30px 60px -30px rgba(0,0,0,.6);">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-2"><span class="dot dot-mint pulse-mint"></span><span class="kicker-sm" style="color:var(--mint);">Network ready · 0G Galileo</span></div>
+        <div class="kicker-sm">draft · v1</div>
+      </div>
+      <label class="block mb-7">
+        <div class="kicker mb-2 flex items-center justify-between">
+          <span>Research goal</span>
+          <span class="text-faint normal-case tracking-normal mono">prefilled · spike 18</span>
+        </div>
+        <textarea rows="4">Compare the security models of LayerZero V2 and Wormhole as of 2026: how each handles message attestation, who runs the verifying nodes, and one concrete vulnerability disclosed against either in the past 18 months.</textarea>
+      </label>
+      <label class="block mb-7">
+        <div class="kicker mb-2">Budget · USDC</div>
+        <div class="flex items-stretch gap-3">
+          <div class="relative flex-1">
+            <input type="number" value="1" step="0.1" min="0"/>
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 mono text-[13px] text-faint">USDC</span>
+          </div>
+          <div class="hidden md:flex items-center px-4 mono text-[12px] text-dim bg-code rounded-lg border border-soft" style="white-space:nowrap;">paid in USDC on Base · settled by KeeperHub</div>
+        </div>
+      </label>
+      <details class="mb-7 bg-code border border-soft rounded-lg">
+        <summary class="px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-3"><span class="chev mono text-faint">▸</span><span class="kicker" style="color:var(--fg-dim);">Fee schedule</span></div>
+          <span class="mono text-[12px] text-faint">15 / 60 / 15 / 10</span>
+        </summary>
+        <div class="px-4 pb-4 pt-1 grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-elev rounded-md p-3 border border-soft"><div class="kicker-sm">Planner</div><div class="mono text-fg text-[18px] mt-1">15%</div></div>
+          <div class="bg-elev rounded-md p-3 border border-soft"><div class="kicker-sm">Researchers</div><div class="mono text-fg text-[18px] mt-1">60%</div></div>
+          <div class="bg-elev rounded-md p-3 border border-soft"><div class="kicker-sm">Critic</div><div class="mono text-fg text-[18px] mt-1">15%</div></div>
+          <div class="bg-elev rounded-md p-3 border border-soft"><div class="kicker-sm">Synthesizer</div><div class="mono text-fg text-[18px] mt-1">10%</div></div>
+        </div>
+      </details>
+      <a href="#" onclick="show('detail');return false;" class="accent-glow w-full inline-flex items-center justify-center gap-2 rounded-lg py-4 text-[18px] font-semibold" style="background:var(--accent);color:#1a1306;">Post bounty <span aria-hidden="true">→</span></a>
+      <div class="mt-4 flex items-center gap-2 mono text-[12px] text-faint">
+        <span class="dot" style="background:var(--accent);box-shadow:0 0 0 3px rgba(255,209,102,.15);"></span>
+        demo mode · clicking submit links to live bounty&nbsp;#20 on 0G Galileo
+      </div>
+    </div>
+    <div class="max-w-[1100px] mx-auto mt-12 flex flex-wrap items-center justify-center gap-5">
+      <span class="kicker-sm">Built with</span>
+      <div class="flex items-center gap-3" id="hero-logos"></div>
+    </div>
+    <div class="max-w-[1240px] mx-auto mt-20">
+      <div class="grad-divider mb-12"></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-elev border border-soft rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4"><span class="badge-num">1</span><span class="kicker">Plan &amp; Bid</span></div>
+          <div class="text-fg font-semibold text-[20px] mb-2">Decompose &amp; auction</div>
+          <p class="text-dim leading-relaxed">Planner agent decomposes your goal into atomic sub-tasks. Researcher iNFTs bid on-chain for each one.</p>
+        </div>
+        <div class="bg-elev border border-soft rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4"><span class="badge-num">2</span><span class="kicker">Verify</span></div>
+          <div class="text-fg font-semibold text-[20px] mb-2">Independent critic</div>
+          <p class="text-dim leading-relaxed">Critic re-fetches every cited URL via SearXNG and runs an independent attested LLM check on each claim.</p>
+        </div>
+        <div class="bg-elev border border-soft rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4"><span class="badge-num">3</span><span class="kicker">Pay</span></div>
+          <div class="text-fg font-semibold text-[20px] mb-2">Cross-chain payout</div>
+          <p class="text-dim leading-relaxed">Bounty contract fires LayerZero V2 to Base. KeeperHub distributes USDC to all five wallets in <span class="text-mint font-medium">0.7s</span>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</template>
+
+<!-- DETAIL -->
+<template id="tpl-detail">
+<section>
+  <div class="border-b border-soft">
+    <div class="max-w-[1640px] mx-auto px-8 py-7">
+      <div class="flex items-center gap-2 mono text-[12px] text-faint mb-4">
+        <a href="#" onclick="show('post');return false;" class="ext-link">←</a>
+        <a href="#" onclick="show('post');return false;" class="ext-link uppercase tracking-[.14em]">Bounties</a>
+        <span>·</span><span class="text-dim">#20</span>
+      </div>
+      <div class="flex items-start justify-between gap-8 flex-wrap">
+        <div class="flex-1 min-w-[420px]">
+          <h1 class="text-[36px] font-semibold h-tight text-fg mb-3">LayerZero V2 vs. Wormhole — security model audit (2026)</h1>
+          <p class="text-dim text-[18px] leading-snug max-w-[920px]" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">Compare the security models of LayerZero V2 and Wormhole as of 2026: how each handles message attestation, who runs the verifying nodes, and one concrete vulnerability disclosed against either in the past 18 months.</p>
+        </div>
+        <div class="text-right">
+          <div class="pill-completed inline-flex items-center gap-2 px-4 py-2 rounded-full mono text-[14px] tracking-[.12em] uppercase font-medium"><span class="dot dot-mint"></span> Completed</div>
+          <div class="mono text-[13px] text-dim mt-3">6 min 31 sec · 16 tx · 5 signers</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-elev border-b border-soft">
+    <div class="max-w-[1640px] mx-auto px-8 grid grid-cols-1 md:grid-cols-3">
+      <div class="py-5 md:pr-8">
+        <div class="kicker mb-1">Budget</div>
+        <div class="text-fg font-semibold text-[24px] mono tracking-tight">1.000000 <span class="text-dim text-[16px] font-normal">USDC</span></div>
+        <div class="mono text-[12px] text-dim mt-1">paid · Base Sepolia · KH-signed</div>
+      </div>
+      <div class="py-5 md:px-8 md:border-l border-soft">
+        <div class="kicker mb-1">Bounty ID</div>
+        <div class="font-semibold text-[24px] mono tracking-tight">#20</div>
+        <div class="mono text-[12px] text-dim mt-1 flex items-center gap-2">
+          <a href="https://chainscan-galileo.0g.ai/address/0x4a6FE3390000000000000000000000000000F0f2" target="_blank" rel="noopener" class="ext-link">0x4a6FE…F0f2</a>
+          <button class="copy-btn" title="copy"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button>
+        </div>
+      </div>
+      <div class="py-5 md:pl-8 md:border-l border-soft">
+        <div class="kicker mb-1">LZ V2 GUID</div>
+        <div class="font-semibold text-[24px] mono tracking-tight">0x0c6eb880…6ad</div>
+        <div class="mono text-[12px] text-dim mt-1">0G → Base · DVN-attested · ~40s</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-[1400px] mx-auto px-8 pt-16 pb-10">
+    <div class="flex items-end justify-between mb-8">
+      <div><div class="kicker mb-2">Lifecycle</div><h2 class="text-[28px] font-semibold h-tight">Bounty.sol state transitions</h2></div>
+      <div class="mono text-[12px] text-faint hidden md:block">5 / 5 stages · Bounty.sol on 0G Galileo</div>
+    </div>
+
+    <div class="relative">
+      <div class="grid grid-cols-5 items-center relative">
+        <div class="tl-line absolute top-1/2 -translate-y-1/2" style="left:10%;right:10%;z-index:0;"></div>
+        <div class="flex flex-col items-center relative z-10"><div class="tl-node"><div class="tl-node-inner"></div></div></div>
+        <div class="flex flex-col items-center relative z-10"><div class="tl-node"><div class="tl-node-inner"></div></div></div>
+        <div class="flex flex-col items-center relative z-10"><div class="tl-node"><div class="tl-node-inner"></div></div></div>
+        <div class="flex flex-col items-center relative z-10"><div class="tl-node"><div class="tl-node-inner"></div></div></div>
+        <div class="flex flex-col items-center relative z-10"><div class="tl-node"><div class="tl-node-inner"></div></div></div>
+      </div>
+      <div class="grid grid-cols-5 mt-5 text-center">
+        <div><div class="font-semibold text-[18px]">Open</div><div class="mono text-[14px] text-dim mt-1">+0s</div></div>
+        <div><div class="font-semibold text-[18px]">Researching</div><div class="mono text-[14px] text-dim mt-1">+75s</div></div>
+        <div><div class="font-semibold text-[18px]">Reviewing</div><div class="mono text-[14px] text-dim mt-1">+236s</div></div>
+        <div><div class="font-semibold text-[18px]">Synthesizing</div><div class="mono text-[14px] text-dim mt-1">+411s</div></div>
+        <div><div class="font-semibold text-[18px]">Completed</div><div class="mono text-[14px] text-dim mt-1">+411s</div></div>
+      </div>
+    </div>
+
+    <div class="mt-12">
+      <div class="flex items-center justify-between mb-4">
+        <div class="kicker">Stage transactions · 0G Galileo</div>
+        <div class="mono text-[12px] text-faint">scroll →</div>
+      </div>
+      <div class="x-scroll overflow-x-auto pb-3"><div class="flex gap-4 min-w-max" id="tx-chips"></div></div>
+    </div>
+  </div>
+
+  <div class="max-w-[1640px] mx-auto px-8 mt-6">
+    <div class="bg-elev border border-soft rounded-2xl p-8" style="box-shadow:0 30px 60px -30px rgba(0,0,0,.5);">
+      <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
+        <div><div class="kicker mb-2">Cross-chain payout</div><h2 class="text-[28px] font-semibold h-tight">0G → Base via LayerZero V2 · settled by KeeperHub</h2></div>
+        <div class="pill-paid inline-flex items-center gap-2 px-4 py-2 rounded-full mono text-[14px] tracking-[.12em] uppercase font-medium"><span class="dot dot-mint"></span> Paid · 0.7s</div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 lg:gap-8 items-stretch">
+        <div class="bg-elev2 border border-soft rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="logo-tile"><img src="https://unavatar.io/twitter/0g_labs" alt="0G" width="28" height="28" style="border-radius:6px;"/></div>
+            <div><div class="kicker-sm">Source · 0G Galileo</div><div class="font-semibold text-fg">Bounty.submitSynthesis</div></div>
+          </div>
+          <div class="bg-code rounded-lg p-4 border border-soft"><div class="kicker-sm mb-1">Final report root · 0G Storage</div><div class="mono text-[13px] text-dim break-all">0xc013b49b178d0ce16959ae9716a5891532b655b8783ef19936825f50e8889a22</div></div>
+          <div class="bg-code rounded-lg p-4 border border-soft mt-3"><div class="kicker-sm mb-1">LZ V2 message GUID</div><div class="mono text-[13px] text-blue break-all">0x0c6eb88031ea51b3eaa6c6cbb10fab7fcc419eefc4262925ecd29e284985a6ad</div></div>
+        </div>
+        <div class="hidden lg:flex flex-col items-center justify-center" style="min-width:160px;">
+          <div class="kicker-sm mb-3" style="color:var(--blue);">LayerZero V2</div>
+          <div class="lz-arrow w-full"></div>
+          <div class="mono text-[12px] text-dim mt-3">DVN-attested · ~40s</div>
+        </div>
+        <div class="bg-elev2 border border-soft rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="logo-tile"><img src="https://unavatar.io/twitter/keeperhubapp" alt="KH" width="28" height="28" style="border-radius:6px;"/></div>
+            <div><div class="kicker-sm">Destination · Base Sepolia</div><div class="font-semibold text-fg">PaymentMessenger → PaymentRouter.distribute</div></div>
+          </div>
+          <div class="bg-code rounded-lg p-4 border border-soft">
+            <div class="kicker-sm mb-1">distribute tx · Base Sepolia</div>
+            <a href="https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7" target="_blank" rel="noopener" class="mono text-[13px] text-mint break-all hover:underline">0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7 ↗</a>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-3">
+            <div class="bg-code rounded-lg p-3 border border-soft"><div class="kicker-sm">Recipients</div><div class="mono text-fg text-[18px] mt-1">5</div></div>
+            <div class="bg-code rounded-lg p-3 border border-soft"><div class="kicker-sm">USDC sent</div><div class="mono text-fg text-[18px] mt-1">1.000000</div></div>
+            <div class="bg-code rounded-lg p-3 border border-soft"><div class="kicker-sm">Settlement</div><div class="mono text-mint text-[18px] mt-1">0.7s</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-[1640px] mx-auto px-8 mt-14">
+    <div class="flex items-end justify-between mb-6">
+      <div><div class="kicker mb-2">Recipient wallets</div><h2 class="text-[28px] font-semibold h-tight">Five iNFT operators · paid in one tx</h2></div>
+      <div class="mono text-[12px] text-faint hidden md:block">delta source · 0xa06717e4…f0b7</div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" id="recipient-cards"></div>
+  </div>
+</section>
+</template>
+
+<script>
+const SPONSORS = [
+  {src:"https://unavatar.io/twitter/0g_labs",alt:"0G Labs"},
+  {src:"https://unavatar.io/twitter/gensynai",alt:"Gensyn"},
+  {src:"https://unavatar.io/twitter/keeperhubapp",alt:"KeeperHub"},
+  {src:"https://unavatar.io/twitter/LayerZero_Labs",alt:"LayerZero"},
+  {src:"https://raw.githubusercontent.com/searxng/searxng/master/searx/static/themes/simple/img/searxng.svg",alt:"SearXNG"},
+];
+const TX_CHIPS = [
+  {label:"postBounty",t:"+0s",actor:"User",addr:"0xF505…E5ae",hash:"0x4f12c2a1b7e93d4567aa829b6f1d0a1e2b3c5d9f8e7c6a5b4d3e2f1a0b9c8d7e"},
+  {label:"broadcastSubTasks",t:"+75s",actor:"Planner",addr:"0xa2F0…d28b",hash:"0xb3729a4e1d8c6f5a2b9c0e7d4f3a1b8c5d6e9f0a1b2c3d4e5f6a7b8c9d0e1f2a"},
+  {label:"acceptBids",t:"+128s",actor:"Planner",addr:"0xa2F0…d28b",hash:"0xc8f1de9a2b3c4d5e6f7089aabbccddeeff0011223344556677889900aabbccdd"},
+  {label:"submitDraft",t:"+204s",actor:"Researcher 1",addr:"0xfD79…7260",hash:"0xd4e5f6a7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f70819a2b3c4d5e6f7081"},
+  {label:"submitReview",t:"+236s",actor:"Critic",addr:"0x9A5f…e018",hash:"0xe1a2b3c4d5e6f7081920a1b2c3d4e5f60718293a4b5c6d7e8f9081a2b3c4d5e6"},
+  {label:"submitSynthesis",t:"+411s",actor:"Synthesizer",addr:"0xa0e6…D3F0",hash:"0xa0e60d8c7b6a5f4e3d2c1b0a9988776655443322110099887766554433221100"},
+];
+const RECIPIENTS = [
+  {n:1,role:"Planner",addr:"0xa2F013d23ebAF75F2C44e5FE5F84d3351141d28b",amt:"+0.15"},
+  {n:2,role:"Researcher 1",addr:"0xfD7940898dC454F7270E1674dCaeb1dDE7F87260",amt:"+0.30"},
+  {n:3,role:"Researcher 2",addr:"0x869fe9e353AA2cd9A2C0b5144ABFf33f2d730258",amt:"+0.30"},
+  {n:4,role:"Critic",addr:"0x9A5f0650b4870eF944be1612f3139fb36885e018",amt:"+0.15"},
+  {n:5,role:"Synthesizer",addr:"0xe9A52F8794c7053fc4B3110c9b9E26EE9ac6D3F0",amt:"+0.10"},
+];
+const tile=(s,size=28)=>`<div class="logo-tile" title="${s.alt}"><img src="${s.src}" alt="${s.alt}" width="${size}" height="${size}" style="border-radius:6px;display:block;" loading="lazy"/></div>`;
+const tHash=h=>h.slice(0,8)+'…'+h.slice(-4);
+function renderLogos(){
+  const f=document.getElementById('footer-logos');
+  if(f)f.innerHTML=SPONSORS.map(s=>tile(s,22)).join('');
+  const h=document.getElementById('hero-logos');
+  if(h)h.innerHTML=SPONSORS.map(s=>tile(s,28)).join('');
+}
+function renderTx(){
+  const w=document.getElementById('tx-chips');if(!w)return;
+  w.innerHTML=TX_CHIPS.map(c=>`
+    <div class="chip-hover bg-elev border border-soft rounded-xl p-5" style="min-width:300px;">
+      <div class="flex items-center justify-between mb-3"><span class="font-semibold text-fg">${c.label}</span><span class="mono text-[12px] text-dim">${c.t}</span></div>
+      <div class="mono text-[13px] text-dim mb-1">${c.actor} · <span class="text-fg">${c.addr}</span></div>
+      <div class="mono text-[12px] text-faint mb-4 break-all">${tHash(c.hash)}</div>
+      <a href="https://chainscan-galileo.0g.ai/tx/${c.hash}" target="_blank" rel="noopener" class="ext-link mono text-[12px] tracking-[.1em] uppercase">↗ View on 0gscan</a>
+    </div>`).join('');
+}
+function renderRec(){
+  const w=document.getElementById('recipient-cards');if(!w)return;
+  w.innerHTML=RECIPIENTS.map(r=>`
+    <div class="bg-elev border border-soft rounded-xl p-5 chip-hover">
+      <div class="flex items-center justify-between mb-4"><div class="font-semibold text-[18px]">${r.role}</div><span class="badge-num">${r.n}</span></div>
+      <div class="bg-code rounded-md p-3 border border-soft mb-4"><div class="kicker-sm mb-1">Operator wallet</div><div class="mono text-[12px] text-dim break-all">${r.addr}</div></div>
+      <div class="flex items-baseline justify-between"><div class="mono font-semibold text-[20px] text-mint">${r.amt} <span class="text-[14px] text-dim font-normal">USDC</span></div><a href="https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7" target="_blank" rel="noopener" class="mono text-[11px] text-faint ext-link tracking-[.1em] uppercase">delta ↗</a></div>
+    </div>`).join('');
+}
+function show(which){
+  const tpl=document.getElementById('tpl-'+which);
+  const app=document.getElementById('app');
+  app.innerHTML='';app.appendChild(tpl.content.cloneNode(true));
+  document.getElementById('tab-post').className=which==='post'?'tab-active border px-5 py-3 mono text-[12px] uppercase tracking-[.14em] rounded-t-md border-b-0':'tab-idle border px-5 py-3 mono text-[12px] uppercase tracking-[.14em] rounded-t-md border-b-0';
+  document.getElementById('tab-detail').className=which==='detail'?'tab-active border px-5 py-3 mono text-[12px] uppercase tracking-[.14em] rounded-t-md border-b-0':'tab-idle border px-5 py-3 mono text-[12px] uppercase tracking-[.14em] rounded-t-md border-b-0';
+  renderLogos();
+  if(which==='detail'){renderTx();renderRec();}
+  window.scrollTo({top:0});
+}
+window.addEventListener('DOMContentLoaded',()=>show('post'));
+</script>
+</body>
+</html>

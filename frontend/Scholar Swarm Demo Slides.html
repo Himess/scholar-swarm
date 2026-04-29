@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Scholar Swarm — Demo Slides</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --bg-elev: #ffffff;
+    --fg: #0e0e10;
+    --fg-dim: #4b4b52;
+    --fg-faint: #8a8a92;
+    --accent: #b8860b;          /* deep warm yellow that reads on white */
+    --accent-soft: #fff4d1;     /* light warm yellow tint for fills */
+    --mint: #059669;
+    --red: #dc2626;
+    --border: #e5e5e2;
+    --border-strong: #d4d4d0;
+    --code-bg: #f1f1ee;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #ececea;
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  .slide {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    padding: 60px 70px;
+    margin: 24px auto;
+    box-shadow: 0 0 0 1px var(--border), 0 30px 80px rgba(0,0,0,0.12);
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-faint);
+    font-weight: 500;
+  }
+  .headline-tight {
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .logo-tile {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-tile img { display: block; border-radius: 6px; object-fit: cover; }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    color: var(--fg-dim);
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 4px rgba(5,150,105,0.15);
+    display: inline-block;
+  }
+  .num-badge {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  .arch-panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+  }
+  .lz-line {
+    position: relative;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue) 30%, var(--blue) 70%, transparent);
+    box-shadow: 0 0 20px rgba(37,99,235,0.35);
+  }
+  .lz-line::before, .lz-line::after {
+    content: ''; position: absolute; top: 50%;
+    width: 0; height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    transform: translateY(-50%);
+  }
+  .lz-line::before { left: 0; border-right: 10px solid var(--blue); }
+  .lz-line::after { right: 0; border-left: 10px solid var(--blue); }
+  .check {
+    color: var(--mint);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    margin-right: 14px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- SLIDE 1 — TITLE                                              -->
+<!-- ============================================================ -->
+<section class="slide grid-bg" data-screen-label="01 Title">
+  <div class="h-full w-full flex flex-col">
+    <div class="flex-1"></div>
+    <div class="kicker">3-MINUTE DEMO</div>
+    <h1 class="headline-tight font-bold mt-6" style="font-size:144px;">SCHOLAR SWARM</h1>
+    <div class="italic mt-8" style="font-size:36px;font-weight:500;color:var(--accent);letter-spacing:-0.01em;">
+      AutoGPT for serious research.
+    </div>
+    <div class="flex-1"></div>
+    <div class="mono" style="font-size:22px;color:var(--fg-dim);">
+      ETHGlobal Open Agents · 2026
+    </div>
+    <div class="flex-1"></div>
+
+    <!-- Bottom strip -->
+    <div>
+      <div class="kicker mb-4">BUILT WITH:</div>
+      <div class="flex items-center" style="gap:36px;">
+        <div class="logo-tile" style="width:96px;height:96px;"><img src="https://unavatar.io/twitter/0g_labs" style="width:72px;height:72px;" alt="0G"></div>
+        <div class="logo-tile" style="width:96px;height:96px;"><img src="https://unavatar.io/twitter/gensynai" style="width:72px;height:72px;" alt="Gensyn"></div>
+        <div class="logo-tile" style="width:96px;height:96px;"><img src="https://unavatar.io/twitter/keeperhubapp" style="width:72px;height:72px;" alt="KeeperHub"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2 — WHO AM I                                           -->
+<!-- ============================================================ -->
+<section class="slide" data-screen-label="02 Who Am I">
+  <div class="h-full w-full flex" style="gap:60px;">
+    <!-- Left 40% -->
+    <div style="width:40%;" class="flex flex-col justify-center">
+      <div class="kicker">SOLO BUILD</div>
+      <div class="font-bold headline-tight mt-8" style="font-size:96px;color:var(--accent);">Hi.</div>
+      <div class="font-bold headline-tight mt-2" style="font-size:72px;color:var(--fg);">I'm Semih.</div>
+      <div class="mono mt-6" style="font-size:22px;color:var(--fg-dim);">
+        Solo developer · Türkiye
+      </div>
+    </div>
+
+    <!-- Right 60% -->
+    <div style="width:60%;" class="flex flex-col justify-center">
+      <ul class="flex flex-col" style="gap:28px;font-size:26px;line-height:1.6;">
+        <li class="flex items-start" style="gap:18px;">
+          <span style="color:var(--accent);font-size:26px;">▸</span>
+          <span>Smart-contract security &amp; FHE protocols background</span>
+        </li>
+        <li class="flex items-start" style="gap:18px;">
+          <span style="color:var(--accent);font-size:26px;">▸</span>
+          <span>Solo · <span class="mono" style="color:var(--mint);font-weight:600;">19 / 19</span> integration spikes pass</span>
+        </li>
+      </ul>
+      <div class="mt-16 mono" style="font-size:18px;">
+        <a href="#" style="color:var(--accent);text-decoration:underline;">github.com/Himess/scholar-swarm</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3 — THE PROBLEM                                        -->
+<!-- ============================================================ -->
+<section class="slide" data-screen-label="03 Problem">
+  <div class="h-full w-full flex flex-col items-center justify-center text-center">
+    <div class="kicker">THE PROBLEM</div>
+
+    <blockquote class="italic font-medium headline-tight mt-12" style="font-size:56px;max-width:1400px;color:var(--fg);">
+      “AutoGPT can hallucinate sources,<br>and you'd never know.”
+    </blockquote>
+
+    <div class="flex items-center justify-center mt-20" style="gap:32px;">
+      <div class="chip"><span style="color:var(--red);">✕</span> No source-fetching</div>
+      <div class="chip"><span style="color:var(--red);">✕</span> No critic verification</div>
+      <div class="chip"><span style="color:var(--red);">✕</span> No model attestation</div>
+    </div>
+
+    <div class="mono mt-20" style="font-size:22px;color:var(--fg-faint);max-width:1400px;">
+      For research with stakes — security, due diligence, journalism — that's not enough.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4 — WHAT WE BUILT                                      -->
+<!-- ============================================================ -->
+<section class="slide" data-screen-label="04 What We Built">
+  <div class="h-full w-full flex flex-col">
+    <div class="flex" style="gap:48px;flex:1;min-height:0;">
+      <!-- LEFT HALF -->
+      <div style="width:50%;" class="flex flex-col">
+        <div class="kicker">THREE MECHANISMS</div>
+        <div class="flex flex-col mt-8" style="gap:16px;">
+          <!-- card 1 -->
+          <div class="card flex items-center" style="height:130px;gap:24px;">
+            <div style="font-size:36px;">🔍</div>
+            <div class="flex-1">
+              <div class="font-semibold" style="font-size:24px;">Real source fetching</div>
+              <div class="mt-1" style="font-size:16px;color:var(--fg-dim);">Self-hosted SearXNG · every claim has a URL</div>
+            </div>
+            <div class="logo-tile" style="width:56px;height:56px;align-self:flex-end;">
+              <img src="https://raw.githubusercontent.com/searxng/searxng/master/searx/static/themes/simple/img/searxng.svg" style="width:40px;height:40px;" alt="SearXNG">
+            </div>
+          </div>
+          <!-- card 2 -->
+          <div class="card flex items-center" style="height:130px;gap:24px;">
+            <div style="font-size:36px;color:var(--mint);">✓</div>
+            <div class="flex-1">
+              <div class="font-semibold" style="font-size:24px;">Critic verification</div>
+              <div class="mt-1" style="font-size:16px;color:var(--fg-dim);">HTTP re-fetch + LLM semantic check</div>
+            </div>
+            <div class="flex flex-col items-center" style="gap:6px;align-self:flex-end;">
+              <div class="logo-tile" style="width:56px;height:56px;"><img src="https://unavatar.io/twitter/0g_labs" style="width:40px;height:40px;" alt="0G"></div>
+              <div class="mono" style="font-size:10px;color:var(--fg-faint);">0G COMPUTE</div>
+            </div>
+          </div>
+          <!-- card 3 -->
+          <div class="card flex items-center" style="height:130px;gap:24px;">
+            <div style="font-size:36px;">🔐</div>
+            <div class="flex-1">
+              <div class="font-semibold" style="font-size:24px;">TEE-attested inference</div>
+              <div class="mt-1" style="font-size:16px;color:var(--fg-dim);">qwen2.5-7b on dstack via 0G Compute</div>
+            </div>
+            <div class="logo-tile" style="width:56px;height:56px;align-self:flex-end;"><img src="https://unavatar.io/twitter/0g_labs" style="width:40px;height:40px;" alt="0G"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT HALF -->
+      <div style="width:50%;" class="flex flex-col">
+        <div class="flex items-end justify-between">
+          <div class="kicker">FIVE iNFT AGENTS</div>
+          <div class="flex items-center" style="gap:10px;">
+            <div class="logo-tile" style="width:36px;height:36px;"><img src="https://unavatar.io/twitter/0g_labs" style="width:24px;height:24px;" alt="0G"></div>
+            <span class="mono" style="font-size:12px;color:var(--fg-faint);">MINTED ON 0G GALILEO</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col mt-8" style="gap:8px;">
+          <!-- 5 rows -->
+          <div class="card flex items-center" style="height:60px;padding:12px 20px;gap:18px;">
+            <span class="live-dot"></span>
+            <div class="num-badge">#1</div>
+            <div class="font-semibold flex-1" style="font-size:22px;">Planner</div>
+            <div class="mono" style="font-size:16px;color:var(--fg-dim);">Agent #1 · 0x68c0…</div>
+          </div>
+          <div class="card flex items-center" style="height:60px;padding:12px 20px;gap:18px;">
+            <span class="live-dot"></span>
+            <div class="num-badge">#2</div>
+            <div class="font-semibold flex-1" style="font-size:22px;">Researcher 1</div>
+            <div class="mono" style="font-size:16px;color:var(--fg-dim);">Agent #2 · 0x68c0…</div>
+          </div>
+          <div class="card flex items-center" style="height:60px;padding:12px 20px;gap:18px;">
+            <span class="live-dot"></span>
+            <div class="num-badge">#3</div>
+            <div class="font-semibold flex-1" style="font-size:22px;">Researcher 2</div>
+            <div class="mono" style="font-size:16px;color:var(--fg-dim);">Agent #3 · 0x68c0…</div>
+          </div>
+          <div class="card flex items-center" style="height:60px;padding:12px 20px;gap:18px;">
+            <span class="live-dot"></span>
+            <div class="num-badge">#4</div>
+            <div class="font-semibold flex-1" style="font-size:22px;">Critic</div>
+            <div class="mono" style="font-size:16px;color:var(--fg-dim);">Agent #4 · 0x68c0…</div>
+          </div>
+          <div class="card flex items-center" style="height:60px;padding:12px 20px;gap:18px;">
+            <span class="live-dot"></span>
+            <div class="num-badge">#5</div>
+            <div class="font-semibold flex-1" style="font-size:22px;">Synthesizer</div>
+            <div class="mono" style="font-size:16px;color:var(--fg-dim);">Agent #5 · 0x68c0…</div>
+          </div>
+        </div>
+
+        <div class="mt-6 mono" style="font-size:14px;color:var(--mint);">
+          ERC-7857 + ERC-8004 unified · encrypted intelligence on 0G Storage
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5 — HOW IT WORKS (ARCHITECTURE)                        -->
+<!-- ============================================================ -->
+<section class="slide" data-screen-label="05 How It Works">
+  <div class="h-full w-full flex flex-col">
+    <div class="kicker">HOW IT WORKS</div>
+    <div class="font-semibold mt-3 headline-tight" style="font-size:32px;color:var(--fg-dim);">
+      Two chains. One trustless bridge.
+    </div>
+
+    <!-- Diagram -->
+    <div class="relative mx-auto mt-10" style="width:1700px;height:700px;">
+      <div class="flex items-center" style="gap:40px;height:520px;">
+        <!-- Left panel -->
+        <div class="arch-panel flex flex-col" style="width:650px;height:520px;">
+          <div class="kicker" style="color:var(--accent);">RESEARCH ECONOMY</div>
+          <div class="font-bold headline-tight mt-3" style="font-size:36px;">0G Galileo</div>
+          <div class="flex flex-col mt-6" style="gap:12px;font-size:18px;">
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> iNFT agents (ERC-7857)</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> Reputation registry (ERC-8004)</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> Royalty vault (ERC-2981 · 95/5)</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> Bounty escrow + state machine</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> 0G Compute (TEE inference)</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> 0G Storage (artifacts + intelligence)</div>
+          </div>
+          <div class="mt-auto pt-6 flex items-center" style="gap:12px;border-top:1px solid var(--border);">
+            <div class="logo-tile" style="width:56px;height:56px;"><img src="https://unavatar.io/twitter/0g_labs" style="width:40px;height:40px;" alt="0G"></div>
+            <span class="mono" style="font-size:13px;color:var(--fg-faint);">0G LABS</span>
+          </div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="flex-1 flex flex-col items-center justify-center" style="gap:14px;">
+          <div class="lz-line w-full"></div>
+          <div class="px-5 py-2 rounded-full font-bold" style="background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.35);color:var(--blue);font-size:24px;box-shadow:0 0 30px rgba(37,99,235,0.15);">
+            LayerZero V2
+          </div>
+          <div class="mono text-center" style="font-size:14px;color:var(--fg-dim);max-width:280px;">
+            DVN-attested · atomic dispatch from<br>Bounty.submitSynthesis()
+          </div>
+        </div>
+
+        <!-- Right panel -->
+        <div class="arch-panel flex flex-col" style="width:650px;height:520px;">
+          <div class="kicker" style="color:var(--accent);">PAYMENT RAILS</div>
+          <div class="font-bold headline-tight mt-3" style="font-size:36px;">Base Sepolia</div>
+          <div class="flex flex-col mt-6" style="gap:12px;font-size:18px;">
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> PaymentRouter (USDC escrow)</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> PaymentMessenger (LZ V2 receiver)</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> KeeperHub Direct Execution</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--accent);">▸</span> Real Circle USDC</div>
+            <div class="flex items-center" style="gap:14px;"><span style="color:var(--mint);">●</span> 0.7s trigger-to-confirm</div>
+          </div>
+          <div class="mt-auto pt-6 flex items-center" style="gap:12px;border-top:1px solid var(--border);">
+            <div class="logo-tile" style="width:56px;height:56px;"><img src="https://unavatar.io/twitter/keeperhubapp" style="width:40px;height:40px;" alt="KeeperHub"></div>
+            <span class="mono" style="font-size:13px;color:var(--fg-faint);">KEEPERHUB · BASE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom AXL bar -->
+      <div class="arch-panel flex items-center mt-8" style="width:1700px;height:110px;padding:18px 28px;gap:24px;">
+        <div class="flex flex-col">
+          <div class="kicker font-semibold" style="color:var(--accent);font-size:14px;">AXL P2P MESH (GENSYN)</div>
+          <div class="mono mt-2" style="font-size:16px;color:var(--fg-dim);">
+            Planner ⇄ Researcher 1 ⇄ Researcher 2 ⇄ Critic ⇄ Synthesizer · MCP-over-AXL tools
+          </div>
+        </div>
+        <div class="ml-auto flex items-center" style="gap:10px;">
+          <div class="logo-tile" style="width:64px;height:64px;"><img src="https://unavatar.io/twitter/gensynai" style="width:48px;height:48px;" alt="Gensyn"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6 — HOW IT'S MADE                                      -->
+<!-- ============================================================ -->
+<section class="slide" data-screen-label="06 How Its Made">
+  <div class="h-full w-full flex flex-col">
+    <div class="kicker">HOW IT'S MADE</div>
+
+    <div class="flex flex-col mt-8" style="gap:16px;">
+      <!-- ROW 1 — 0G -->
+      <div class="flex items-center" style="height:240px;gap:32px;background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;padding:24px;">
+        <div style="width:340px;" class="flex flex-col items-start">
+          <div class="logo-tile" style="width:160px;height:160px;padding:14px;"><img src="https://unavatar.io/twitter/0g_labs" style="width:130px;height:130px;" alt="0G"></div>
+          <div class="font-bold mt-4" style="font-size:32px;letter-spacing:-0.01em;">0G Labs</div>
+          <div class="mono mt-1" style="font-size:13px;color:var(--accent);">Best Agent Framework + Best Autonomous Agents/iNFT</div>
+        </div>
+        <div class="flex-1 flex flex-col" style="gap:10px;font-size:22px;">
+          <div class="flex items-start"><span class="check">✓</span><span>5 iNFT agents minted (ERC-7857)</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>Encrypted intelligence on 0G Storage</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>TEE-attested inference (qwen2.5-7b · dstack)</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>ERC-8004 reputation registry</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>AgentRoyaltyVault (ERC-2981, 95/5 split)</span></div>
+        </div>
+      </div>
+
+      <!-- ROW 2 — Gensyn -->
+      <div class="flex items-center" style="height:240px;gap:32px;border:1px solid var(--border);border-radius:8px;padding:24px;background:transparent;">
+        <div style="width:340px;" class="flex flex-col items-start">
+          <div class="logo-tile" style="width:160px;height:160px;padding:14px;"><img src="https://unavatar.io/twitter/gensynai" style="width:130px;height:130px;" alt="Gensyn"></div>
+          <div class="font-bold mt-4" style="font-size:32px;letter-spacing:-0.01em;">Gensyn AXL</div>
+          <div class="mono mt-1" style="font-size:13px;color:var(--accent);">Best Application of AXL</div>
+        </div>
+        <div class="flex-1 flex flex-col" style="gap:10px;font-size:22px;">
+          <div class="flex items-start"><span class="check">✓</span><span>5 OS processes, 5 separate AXL nodes</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>Cross-ISP mesh verified (Türkiye ↔ EU VPS)</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>MCP-over-AXL agent-to-tool routing</span></div>
+        </div>
+      </div>
+
+      <!-- ROW 3 — KeeperHub -->
+      <div class="flex items-center" style="height:240px;gap:32px;background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;padding:24px;">
+        <div style="width:340px;" class="flex flex-col items-start">
+          <div class="logo-tile" style="width:160px;height:160px;padding:14px;"><img src="https://unavatar.io/twitter/keeperhubapp" style="width:130px;height:130px;" alt="KeeperHub"></div>
+          <div class="font-bold mt-4" style="font-size:32px;letter-spacing:-0.01em;">KeeperHub</div>
+          <div class="mono mt-1" style="font-size:13px;color:var(--accent);">Best Use of KeeperHub + Builder Feedback Bonus</div>
+        </div>
+        <div class="flex-1 flex flex-col" style="gap:10px;font-size:22px;">
+          <div class="flex items-start"><span class="check">✓</span><span>Live workflow <span class="mono" style="font-size:18px;color:var(--fg-dim);">nepsavmovlyko0luy3rpi</span></span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>MCP + Direct Execution REST</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>0.7s trigger-to-confirm payouts</span></div>
+          <div class="flex items-start"><span class="check">✓</span><span>Real Circle USDC distribution</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7 — FUTURE WORK                                        -->
+<!-- ============================================================ -->
+<section class="slide" data-screen-label="07 Future Work">
+  <div class="h-full w-full flex flex-col justify-center">
+    <div class="kicker">FUTURE WORK</div>
+
+    <div class="flex flex-col mt-16" style="gap:60px;max-width:1400px;">
+      <!-- 1 -->
+      <div>
+        <div class="flex items-baseline" style="gap:24px;">
+          <span class="font-bold" style="font-size:64px;color:var(--accent);line-height:1;">1.</span>
+          <span class="font-bold headline-tight" style="font-size:44px;color:var(--fg);">Reverse direction</span>
+        </div>
+        <div class="mono mt-3" style="font-size:20px;color:var(--fg-dim);padding-left:88px;">
+          Base USDC fund → 0G bounty bind via LayerZero V2
+        </div>
+      </div>
+      <!-- 2 -->
+      <div>
+        <div class="flex items-baseline" style="gap:24px;">
+          <span class="font-bold" style="font-size:64px;color:var(--accent);line-height:1;">2.</span>
+          <span class="font-bold headline-tight" style="font-size:44px;color:var(--fg);">dstack-bound TEE oracle</span>
+        </div>
+        <div class="mono mt-3" style="font-size:20px;color:var(--fg-dim);padding-left:88px;">
+          Production verifier replacing the StubVerifier slot
+        </div>
+      </div>
+      <!-- 3 -->
+      <div>
+        <div class="flex items-baseline" style="gap:24px;">
+          <span class="font-bold" style="font-size:64px;color:var(--accent);line-height:1;">3.</span>
+          <span class="font-bold headline-tight" style="font-size:44px;color:var(--fg);">Mainnet deployment</span>
+        </div>
+        <div class="mono mt-3" style="font-size:20px;color:var(--fg-dim);padding-left:88px;">
+          0G Mainnet + Base Mainnet · canonical USDC
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8 — THANKS / CTA                                       -->
+<!-- ============================================================ -->
+<section class="slide grid-bg" data-screen-label="08 Thanks">
+  <div class="h-full w-full flex flex-col">
+    <div class="flex-1"></div>
+    <div class="kicker">THANKS FOR WATCHING.</div>
+    <h2 class="font-bold headline-tight mt-6" style="font-size:96px;color:var(--accent);">Scholar Swarm.</h2>
+
+    <div class="flex flex-col mt-16" style="gap:18px;">
+      <div class="mono" style="font-size:28px;color:var(--accent);">github.com/Himess/scholar-swarm</div>
+      <div class="mono" style="font-size:14px;color:var(--fg-dim);">
+        Spike 19 distribute tx · 0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7
+      </div>
+      <div class="mono" style="font-size:14px;color:var(--fg-dim);">
+        KH workflow · app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi
+      </div>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <div>
+      <div class="kicker mb-4">BUILT WITH:</div>
+      <div class="flex items-center" style="gap:36px;">
+        <div class="logo-tile" style="width:96px;height:96px;"><img src="https://unavatar.io/twitter/0g_labs" style="width:72px;height:72px;" alt="0G"></div>
+        <div class="logo-tile" style="width:96px;height:96px;"><img src="https://unavatar.io/twitter/gensynai" style="width:72px;height:72px;" alt="Gensyn"></div>
+        <div class="logo-tile" style="width:96px;height:96px;"><img src="https://unavatar.io/twitter/keeperhubapp" style="width:72px;height:72px;" alt="KeeperHub"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
