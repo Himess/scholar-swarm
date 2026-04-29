@@ -1,5 +1,13 @@
 # Scholar Swarm
 
+[![Live demo](https://img.shields.io/badge/live%20demo-scholar--swarm.vercel.app-06d6a0?style=flat-square&logo=vercel&logoColor=white)](https://scholar-swarm.vercel.app)
+[![ETHGlobal](https://img.shields.io/badge/ETHGlobal-Open%20Agents%202026-ffd166?style=flat-square)](https://ethglobal.com/events/agents)
+[![0G Galileo](https://img.shields.io/badge/0G%20Galileo-chain%2016602-7c3aed?style=flat-square)](https://chainscan-galileo.0g.ai)
+[![Base Sepolia](https://img.shields.io/badge/Base%20Sepolia-chain%2084532-2563eb?style=flat-square)](https://sepolia.basescan.org)
+[![Sponsors](https://img.shields.io/badge/sponsors-0G%20%C2%B7%20AXL%20%C2%B7%20KeeperHub-f97316?style=flat-square)](#sponsor-track-positioning)
+[![19/19 spikes](https://img.shields.io/badge/spikes-19%2F19%20pass-22c55e?style=flat-square)](#spike-results)
+[![License](https://img.shields.io/badge/license-MIT-1f2937?style=flat-square)](LICENSE)
+
 ### AutoGPT for serious research.
 
 > AutoGPT can hallucinate sources and you'd never know.
@@ -15,8 +23,29 @@ Three mechanisms make the difference:
 **📂 Repo:** [github.com/Himess/scholar-swarm](https://github.com/Himess/scholar-swarm)
 **📧 Contact:** [@Himess__ on X](https://twitter.com/Himess__) · [@SemihCivelek on Telegram](https://t.me/SemihCivelek) · semihcvlk53@gmail.com
 
+> 🟢 **Real testnet, not a simulation.** 1.000000 Circle USDC distributed across 5 distinct operator wallets in **0.7 seconds** via KeeperHub Direct Execution. KH's Para wallet signed `PaymentRouter.distribute()` — we never held its key. Click and verify: [tx `0xa06717e4…f0b7` on Base Sepolia](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7).
+
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
 **Status (Day 11 / 2026-04-30):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
+
+---
+
+## Verifiable on-chain artifacts
+
+Every major claim in this README backs to a real testnet transaction. Use the table below as the single-click entry point — pick a row, click the link, see the artifact resolve on its native explorer.
+
+| What we claim | One-click verification |
+|---|---|
+| **Real Circle USDC** (1.0) split atomically across 5 operator wallets in 0.7s · KH-signed | [`0xa06717e4…f0b7` on Basescan](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) |
+| **Synthesizer fires LayerZero V2** in the same tx as `Bounty.submitSynthesis` | [`0xa0e624d4…aff0` on 0Gscan](https://chainscan-galileo.0g.ai/tx/0xa0e624d4810779f4bc2ed30ca0229175fbb6a8ab14ed0ce4e06b16f9da1eaffc) · [LZ Scan ↗](https://testnet.layerzeroscan.com/tx/0xa0e624d4810779f4bc2ed30ca0229175fbb6a8ab14ed0ce4e06b16f9da1eaffc) |
+| **5 iNFT agents (ERC-7857) minted** with AES-256-GCM encrypted intelligence on 0G Storage | [AgentNFT `0x68c0…5361` on 0Gscan](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) · [iNFT gallery on frontend ↗](https://scholar-swarm.vercel.app/agents) |
+| **Critic naturally rejects** a finding submitted with no source URLs (engineered scenario, real on-chain) | [`0xc01ce049…ebb3a` on 0Gscan](https://chainscan-galileo.0g.ai/tx/0xc01ce0498275a262c1a0e725c44ab3f53c75a9c39051da15ba5f3a9ed50ebb3a) · [verification doc](./docs/demo-video/REJECTION_VERIFICATION_RESULT.md) |
+| **One bounty, 16 chain txs from 5 distinct signer wallets** (Spike 18 multi-process choreography) | [Bounty 20 `0xebdf9F…4eD8`](https://chainscan-galileo.0g.ai/address/0xebdf9FBAcb3172d2441FB7E067EFAB143F7F4eD8) · [timeline on frontend ↗](https://scholar-swarm.vercel.app/bounty/20) |
+| **Cross-ISP AXL Yggdrasil mesh** — Türkiye laptop ↔ EU VPS bidirectional | [Spike 2b PASS in spike-results.md](./docs/spike-results.md) |
+| **iNFT royalty split (95/5 ERC-2981)** — pay-to-authorize tested live | [`0xcef64b77…` on 0Gscan](https://chainscan-galileo.0g.ai/address/0x61cb7bfca6ad0cb050ab227cb22710a932582c61) · [Spike 10 PASS](#spike-results) |
+| **KeeperHub workflow live on org** — `DistributeRequested` → `PaymentRouter.distribute` | [`nepsavmovlyko0luy3rpi` on app.keeperhub.com](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) |
+
+Comprehensive spike-by-spike breakdown with every transition tx hash: [`docs/spike-results.md`](./docs/spike-results.md). Builder-side narrative of the engineering pivots: [`docs/ai-collaboration/`](./docs/ai-collaboration/).
 
 ---
 
