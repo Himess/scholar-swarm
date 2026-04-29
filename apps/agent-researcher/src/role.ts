@@ -179,7 +179,7 @@ export class ResearcherRole extends Role {
       temperature: 0.3,
     });
 
-    const parsed = parseClaims(res.content) ?? {
+    let parsed = parseClaims(res.content) ?? {
       claims: [
         {
           text: `Researcher could not parse model output for bounty ${bountyId} task ${subTaskIndex}.`,
@@ -190,6 +190,31 @@ export class ResearcherRole extends Role {
       ],
       reasoningTrace: res.content.slice(0, 500),
     };
+
+    // DEMO RECORDING HOOK — used only for the demo video to capture a real
+    // Critic rejection scene. When DEMO_REJECT_TASK_INDEX matches this
+    // sub-task, we deliberately emit a claim with NO sourceUrls so:
+    //   • Critic.checkSources([]) returns false (no sources cited)
+    //   • Critic.semanticCheck returns supports=false (no excerpt)
+    //   • Critic graceful fallback `claims.some(c => c.sourceUrls.length > 0)`
+    //     also returns false → finalApproved = false → genuine rejection.
+    // No code change to Critic is needed. Set env var only for video shoot;
+    // unset for production runs.
+    const demoRejectIdx = process.env["DEMO_REJECT_TASK_INDEX"];
+    if (demoRejectIdx !== undefined && Number(demoRejectIdx) === subTaskIndex) {
+      this.log(`[DEMO_REJECT] task=${subTaskIndex} forcing weak claim (no sourceUrls) — Critic should reject`);
+      parsed = {
+        claims: [
+          {
+            text: `[demo] Initial finding for sub-question: ${subQuestion.slice(0, 100)}`,
+            sourceUrls: [],
+            excerpts: [],
+            confidence: 0.45,
+          },
+        ],
+        reasoningTrace: "Researcher initial pass — could not surface a primary source within retrieval budget.",
+      };
+    }
 
     // 3. Store findings on 0G Storage. The merkle root is what we anchor on chain.
     const findingsBody: Findings = {
