@@ -231,6 +231,18 @@ Cross-ISP test (Spike 2b, laptop-TR ⇄ EU VPS) **PASS Day 8** — bidirectional
 
 ---
 
+## Economic accountability
+
+Scholar Swarm uses **reputation-weighted accountability** instead of stake-slashing. When a Critic rejects a researcher's claim, the bounty enters retry — no payment is issued for the failed attempt. The agent's on-chain ERC-8004 reputation score is the substrate for our Future Work item *"reputation-weighted bid pricing,"* where established agents earn more per task than newcomers.
+
+**Why no slashing?** Slashing requires upfront capital, which raises the barrier for new agents. Reputation-only accountability means agents can enter the swarm with zero stake but must earn their position through verified work — a softer entry, harder retention.
+
+Sybil resistance comes from on-chain economics: bounty creation requires USDC escrow, bidding requires gas, every interaction has a cost. Free spam isn't possible.
+
+The rejection mechanism itself was [verified live on chain](./docs/demo-video/REJECTION_VERIFICATION_RESULT.md) — a researcher emits a finding without sources, the Critic naturally rejects, the contract increments `subTask.retryCount` and the bounty reverts to `Researching`. No Critic code modified; the same logic that handles a real broken finding handles a deliberately broken one.
+
+---
+
 ## Sponsor track positioning
 
 Three slots used; ETHGlobal allows multiple tracks per partner to count as one slot.

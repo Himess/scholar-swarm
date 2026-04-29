@@ -1,8 +1,8 @@
 # Scholar Swarm — Demo Video Script
 
-> **Target:** 3:00 hard cap (ETHGlobal: 2-4 min, 0G: under 3 min). Real voice (no TTS). Captions burned-in. 1080p+.
+> **Target:** 2:58 (safe margin under 0G's "under 3 mins" requirement; ETHGlobal min 2:00). Real voice (no TTS). Captions burned-in. 1080p+.
 >
-> **Total word count:** ~210 (≈ 70 words/min comfortable English pace).
+> **Total word count:** ~395 across 2:58 ≈ 133 words/min — comfortable, not rushed.
 > **Recording note:** Speak slow. Pause between segments. Re-take per segment is fine; we cut later.
 
 ---
@@ -146,7 +146,7 @@
 
 ---
 
-### [2:15–2:40] · HOW IT'S MADE · 25s
+### [2:15–2:45] · HOW IT'S MADE · 30s
 
 **Visual:** Three-row table, each row a sponsor logo + bullet list. Order is strategic.
 
@@ -167,38 +167,40 @@
 - MCP + Direct Execution REST
 - 0.7s trigger-to-confirm
 
-**Voiceover (≈55 words):**
-> "Three sponsor integrations, all live on testnet. 0G — five iNFT agents, encrypted on 0G Storage, attested inference on 0G Compute. Gensyn AXL — five separate nodes, cross-ISP verified. KeeperHub — live workflow, point-seven-second payouts. Nineteen out of nineteen integration spikes pass."
+**Optional accountability beat** (5s, plays at the end of the segment over the same three-row table or a brief "no slashing" badge overlay)
+
+**Voiceover (≈70 words):**
+> "Three sponsor integrations, all live on testnet. 0G — five iNFT agents, encrypted on 0G Storage, attested inference on 0G Compute. Gensyn AXL — five separate nodes, cross-ISP verified. KeeperHub — live workflow, point-seven-second payouts. Nineteen out of nineteen integration spikes pass. **We don't slash agents. Rejected work simply doesn't pay — accountability without locked capital.**"
 
 ---
 
-### [2:40–2:50] · FUTURE WORK · 10s
+### [2:45–2:51] · FUTURE WORK · 6s
 
 **Visual:**
 - Two numbered items, big text:
   1. Reverse direction: Base USDC fund → 0G bounty bind
   2. dstack-bound TEE oracle (production verifier)
 
-**Voiceover (≈22 words):**
-> "Future work — reverse-direction bounty funding from Base, and a production dstack TEE verifier replacing our stub."
+**Voiceover (≈14 words):**
+> "Future work — reverse-direction bounty funding, and a production dstack TEE verifier."
 
 ---
 
-### [2:50–3:00] · CTA · 10s
+### [2:51–2:58] · CTA · 7s
 
 **Visual:**
 - URL: `github.com/Himess/scholar-swarm`
 - Subtitle: `Spike 19 distribute tx · 0xa06717e4…` (clickable in description)
 - Webcam PIP returns top-right.
 
-**Voiceover (≈18 words):**
-> "All on-chain proof, all open source. Scholar Swarm. Thanks for watching."
+**Voiceover (≈12 words):**
+> "All on-chain proof, all open source. Scholar Swarm. Thanks."
 
 ---
 
-## 📊 Total word count: ~389 words across 3:00 = ~130 words/min average
+## 📊 Total word count: ~395 words across 2:58 ≈ 133 words/min
 
-> **NOTE:** This is over my earlier 195 estimate because I expanded each segment after seeing the visual brief. **130 wpm is comfortable, not rushed.** If timing tight, cut Future Work narration to one sentence (save 5s).
+> **NOTE:** Comfortable, not rushed. Total stays under 0G's "under 3 mins" requirement with 2 seconds of margin. The accountability beat (`We don't slash agents…`) at the end of How It's Made is the strategic positioning vs slashing-based competitors — pre-empts the "no slashing?" objection by reframing it as a deliberate design choice.
 
 ---
 
