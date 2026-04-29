@@ -252,6 +252,23 @@ Sybil resistance comes from on-chain economics: bounty creation requires USDC es
 
 The rejection mechanism itself was [verified live on chain](./docs/demo-video/REJECTION_VERIFICATION_RESULT.md) — a researcher emits a finding without sources, the Critic naturally rejects, the contract increments `subTask.retryCount` and the bounty reverts to `Researching`. No Critic code modified; the same logic that handles a real broken finding handles a deliberately broken one.
 
+### Critic audit trail (per-claim rationale on 0G Storage)
+
+Every Critic verdict is more than a boolean. For each claim the Critic checks, it records:
+
+```
+{
+  claimIndex,
+  sourceFetchedOk:   <bool>      // did the URL HTTP-fetch succeed?
+  semanticMatch:     <bool>      // did the LLM say the excerpt supports the claim?
+  notes:             <rationale> // the LLM's 1-line "why I voted this way"
+}
+```
+
+The full per-claim verdict array is written to **0G Storage** as a single JSON blob, and the resulting `reasonURI` (e.g. `0gstorage://0x…`) is committed on-chain in the `ClaimReviewed` event. Anyone holding a `reasonURI` can fetch the blob from 0G and reconstruct *exactly why* the Critic approved or rejected — claim by claim, with the LLM's reasoning attached.
+
+Implementation: [`apps/agent-critic/src/role.ts`](./apps/agent-critic/src/role.ts) — `storeRationale()` + `semanticCheck()`. Inference runs on 0G Compute (TEE-attested) so the rationale itself is verifiable, not just stored.
+
 ---
 
 ## Sponsor track positioning
