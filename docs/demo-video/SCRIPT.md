@@ -12,9 +12,9 @@
 ### [0:00–0:08] · TITLE SLIDE · 8s
 
 **Visual:**
-- Black background, "SCHOLAR SWARM" big bold center, tagline below.
-- Bottom strip: `Built with: 0G · Gensyn AXL · KeeperHub · LayerZero V2`
-- Webcam PIP top-right (Semih on camera).
+- Light cream background, "SCHOLAR SWARM" big bold center, tagline below.
+- Bottom strip: `Built with: 0G · Gensyn AXL · KeeperHub` (3 sponsors only — LZ is infra not a prize track)
+- No webcam, slide-only.
 
 **Voiceover (≈18 words):**
 > "Scholar Swarm — AutoGPT for serious research. Built solo for ETHGlobal Open Agents 2026."
@@ -24,8 +24,7 @@
 ### [0:08–0:18] · WHO AM I · 10s
 
 **Visual:**
-- Slide: portrait or simple "Semih · Solo build · Türkiye".
-- Webcam PIP still visible.
+- Slide: "Hi. I'm Semih." + "Solo developer · Türkiye" + 2-3 bullets.
 
 **Voiceover (≈22 words):**
 > "Hi, I'm Semih. Solo developer from Türkiye. Smart-contract security background. I built Scholar Swarm in ten days for this hackathon."
@@ -174,27 +173,27 @@
 
 ---
 
-### [2:45–2:51] · FUTURE WORK · 6s
+### [2:45–2:53] · FUTURE WORK · 8s
 
 **Visual:**
-- Two numbered items, big text:
+- Three numbered items, big text:
   1. Reverse direction: Base USDC fund → 0G bounty bind
   2. dstack-bound TEE oracle (production verifier)
+  3. Reputation-weighted bid pricing (ERC-8004 → bid range)
 
-**Voiceover (≈14 words):**
-> "Future work — reverse-direction bounty funding, and a production dstack TEE verifier."
+**Voiceover (≈18 words):**
+> "Future work — reverse-direction bounty funding, a production dstack TEE verifier, and reputation-weighted bid pricing on top of ERC-8004."
 
 ---
 
-### [2:51–2:58] · CTA · 7s
+### [2:53–2:58] · CTA · 5s
 
 **Visual:**
-- URL: `github.com/Himess/scholar-swarm`
+- URL: `scholar-swarm.vercel.app` + `github.com/Himess/scholar-swarm`
 - Subtitle: `Spike 19 distribute tx · 0xa06717e4…` (clickable in description)
-- Webcam PIP returns top-right.
 
-**Voiceover (≈12 words):**
-> "All on-chain proof, all open source. Scholar Swarm. Thanks."
+**Voiceover (≈10 words):**
+> "All on-chain. All open source. Scholar Swarm. Thanks."
 
 ---
 

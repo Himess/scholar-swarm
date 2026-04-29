@@ -26,20 +26,12 @@ export default function BountyDetailPage() {
 
               <div className="flex items-start justify-between gap-8 flex-wrap">
                 <div className="flex-1 min-w-[420px]">
-                  <h1 className="text-[36px] font-semibold h-tight text-fg mb-3">
-                    {BOUNTY.title}
-                  </h1>
-                  <p
-                    className="text-fg-dim text-[18px] leading-snug max-w-[920px]"
-                    style={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
+                  <div className="kicker-sm mb-2" style={{ color: "var(--fg-faint)" }}>Research goal</div>
+                  <h1
+                    className="text-[28px] font-semibold h-tight text-fg leading-snug max-w-[920px]"
                   >
                     {BOUNTY.goal}
-                  </p>
+                  </h1>
                 </div>
                 <div className="text-right">
                   <div className="pill-completed inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[14px] tracking-[0.12em] uppercase font-medium">
@@ -160,7 +152,7 @@ export default function BountyDetailPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="kicker-sm">Built with</span>
-            <SponsorStrip size={22} />
+            <SponsorStrip size={22} showInfra />
           </div>
         </div>
       </footer>

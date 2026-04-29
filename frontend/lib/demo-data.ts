@@ -110,11 +110,19 @@ export const RECIPIENTS: Recipient[] = [
 ];
 
 export type Sponsor = { src: string; alt: string };
+
+// Three sponsor tracks we apply for: 0G Labs (Framework + Swarms), Gensyn AXL,
+// KeeperHub (Best Use + Builder Feedback Bonus). Shown prominently as "Sponsors".
 export const SPONSORS: Sponsor[] = [
   { src: "https://unavatar.io/twitter/0g_labs",        alt: "0G Labs" },
-  { src: "https://unavatar.io/twitter/gensynai",       alt: "Gensyn" },
+  { src: "https://unavatar.io/twitter/gensynai",       alt: "Gensyn AXL" },
   { src: "https://unavatar.io/twitter/keeperhubapp",   alt: "KeeperHub" },
-  { src: "https://unavatar.io/twitter/LayerZero_Labs", alt: "LayerZero" },
+];
+
+// Other infrastructure used but not applied for as sponsor prize tracks.
+// Shown as "Powered by" — distinguishes integration from prize eligibility.
+export const INFRA: Sponsor[] = [
+  { src: "https://unavatar.io/twitter/LayerZero_Labs", alt: "LayerZero V2" },
   { src: "https://raw.githubusercontent.com/searxng/searxng/master/searx/static/themes/simple/img/searxng.svg", alt: "SearXNG" },
 ];
 

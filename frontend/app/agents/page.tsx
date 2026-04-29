@@ -138,7 +138,7 @@ export default function AgentsPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="kicker-sm">Built with</span>
-            <SponsorStrip size={22} />
+            <SponsorStrip size={22} showInfra />
           </div>
         </div>
       </footer>

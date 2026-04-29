@@ -119,7 +119,7 @@ export default function HomePage() {
             {/* Trust strip */}
             <div className="max-w-[1100px] mx-auto mt-12 flex flex-wrap items-center justify-center gap-5">
               <span className="kicker-sm">Built with</span>
-              <SponsorStrip size={28} />
+              <SponsorStrip size={28} showInfra />
             </div>
 
             {/* What happens next */}
@@ -169,7 +169,7 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="kicker-sm">Built with</span>
-            <SponsorStrip size={22} />
+            <SponsorStrip size={22} showInfra />
           </div>
         </div>
       </footer>
