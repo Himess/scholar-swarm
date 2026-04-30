@@ -159,32 +159,32 @@ Scholar Swarm runs on two chains because each one does a job the other can't.
 The two are stitched by a **trustless** cross-chain link (LayerZero V2), not a bot. See [§ Cross-chain payment via LayerZero V2](#cross-chain-payment-via-layerzero-v2).
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph mesh["AXL P2P mesh · Yggdrasil overlay · 5 agents coordinate here"]
       direction LR
       P((Planner)) --- R1((R1)) --- R2((R2)) --- C((Critic)) --- S((Synth))
     end
 
     subgraph og["0G Galileo · chain 16602 · the economy"]
-      direction TB
+      direction LR
       og_id["AgentNFT<br/>ERC-7857 + ERC-8004"]
-      og_b["BountyFactory + Bounty impl V2<br/>payable submitSynthesis fires LZ atomically"]
+      og_b["BountyFactory + Bounty impl V2<br/>payable submitSynthesis<br/>fires LZ atomically"]
       og_msg["BountyMessenger<br/>LZ V2 OApp"]
       og_inf["0G Compute · TEE-attested<br/>0G Storage · merkle-rooted"]
-      og_id --> og_b --> og_msg
       og_inf -.-> og_b
+      og_id --> og_b --> og_msg
     end
 
     subgraph base["Base Sepolia · chain 84532 · the money"]
-      direction TB
+      direction LR
       base_msg["PaymentMessenger<br/>LZ V2 OApp"]
       base_pr["PaymentRouter<br/>USDC escrow + multi-distribute"]
       base_msg --> base_pr
     end
 
-    kh[/"KeeperHub<br/>Direct Execution API<br/>gas · retry · audit log"\]
+    kh[/"KeeperHub Direct Execution API<br/>gas · retry · audit log"\]
 
-    mesh -.->|"agents sign on-chain actions"| og
+    mesh ==>|"agents sign on-chain actions"| og
     og_msg <==>|"LZ V2 · DVN-attested · ~40s"| base_msg
     base_msg -.->|"emits DistributeRequested"| kh
     kh ==>|"signs distribute()"| base_pr
