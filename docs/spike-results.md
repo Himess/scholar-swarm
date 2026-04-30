@@ -23,6 +23,8 @@
 | 16 | Bounty.submitSynthesis fires LZ atomically (V2) | ✅ pass | V2 factory + payable submitSynthesis dispatches notifyCompletion in one tx — GUID `0x6cfdf46b…` | First architectural slice that closes the cross-chain loop without an off-chain coordinator |
 | 17 | Full E2E (single-process orchestrator) | ✅ pass | Spike 17 PASS, 7 attested 0G inferences + 7 0G Storage refs + bounty + LZ V2, GUID `0x82fcb3f2…` (SearXNG) | One `pnpm spike:17` runs the entire pipeline; functions as the demo fallback |
 | 18 | Multi-process choreography (5 processes, 5 AXL nodes, 5 ledgers) | ✅ pass | 5 OS processes coordinated bounty 20 end-to-end. Each agent signed its own chain tx + ran inference under its own 0G ledger. Synth fired LZ V2, GUID `0x0c6eb880…` | This is the "five different operators" pitch made literal |
+| 19 | Real Circle USDC payout to 5 wallets | ✅ pass | KH Direct Execution signed `PaymentRouter.distribute(...)` with the Para wallet; 1.000000 USDC split exactly per the Bounty fee schedule across 5 distinct operator wallets in 0.7s | tx `0xa06717e4…` on Base Sepolia, KH-signed |
+| 20 | SearXNG retrieval over MCP-over-AXL | ✅ pass | One AXL peer hosts a JSON-RPC router proxying SearXNG; another peer queries it via `POST /mcp/{peer}/searxng` and gets real Google/Bing/DuckDuckGo results back through the Yggdrasil mesh in 2.3s | Closes Spike 3's mock-router proof with a real production tool — `infra/axl-node-b/searxng-mcp-router.js` |
 
 Statuses: ⏳ pending · 🟡 partial · ✅ pass · ❌ fail · 🔀 pivoted
 

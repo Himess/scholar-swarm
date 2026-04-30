@@ -5,7 +5,7 @@
 [![0G Galileo](https://img.shields.io/badge/0G%20Galileo-chain%2016602-7c3aed?style=flat-square)](https://chainscan-galileo.0g.ai)
 [![Base Sepolia](https://img.shields.io/badge/Base%20Sepolia-chain%2084532-2563eb?style=flat-square)](https://sepolia.basescan.org)
 [![Sponsors](https://img.shields.io/badge/sponsors-0G%20%C2%B7%20AXL%20%C2%B7%20KeeperHub-f97316?style=flat-square)](#sponsor-track-positioning)
-[![19/19 spikes](https://img.shields.io/badge/spikes-19%2F19%20pass-22c55e?style=flat-square)](#spike-results)
+[![20/20 spikes](https://img.shields.io/badge/spikes-20%2F20%20pass-22c55e?style=flat-square)](#spike-results)
 [![License](https://img.shields.io/badge/license-MIT-1f2937?style=flat-square)](LICENSE)
 
 ### AutoGPT for serious research.
@@ -26,7 +26,7 @@ Three mechanisms make the difference:
 > 🟢 **Real testnet, not a simulation.** 1.000000 Circle USDC distributed across 5 distinct operator wallets in **0.7 seconds** via KeeperHub Direct Execution. KH's Para wallet signed `PaymentRouter.distribute()` — we never held its key. Click and verify: [tx `0xa06717e4…f0b7` on Base Sepolia](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7).
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 12 / 2026-04-30):** 9 contracts live on two chains (7 on 0G Galileo, 2 on Base Sepolia) · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live · **continuously running on EU VPS with 6-hour auto-bounty cadence** ([latest run](./docs/vps-runs/latest.json)).
+**Status (Day 12 / 2026-04-30):** 9 contracts live on two chains (7 on 0G Galileo, 2 on Base Sepolia) · 5 iNFT agents minted to distinct operator wallets · **20/20 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets), [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7), and [Spike 20 — SearXNG retrieval rides MCP-over-AXL end-to-end](#spike-results) (real Google results returned to a peer through the Yggdrasil mesh in 2.3s) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval over the AXL mesh, cross-ISP AXL mesh, all live · **continuously running on EU VPS with 6-hour auto-bounty cadence** ([latest run](./docs/vps-runs/latest.json)).
 
 ---
 
@@ -143,6 +143,7 @@ Frontend source: [`frontend/`](./frontend/) — Next.js 16 + Tailwind + Framer M
 | **Full E2E** (single-process orchestrator) | ✅ live | One script (`pnpm spike:17`), real Google sources via self-hosted SearXNG, 7 attested inferences, 7 storage refs, GUID `0x83e18d89…` — [Spike 17 PASS](#spike-results) |
 | **Multi-process choreography** (5 processes, 5 AXL nodes, 5 ledgers) | ✅ live | 5 OS processes coordinated bounty 20 end-to-end. 16 chain txs from 5 distinct operator wallets. Synth fires LZ V2 atomically — GUID `0x0c6eb880…` — [Spike 18 PASS](#spike-results) |
 | **Circle USDC end-to-end payout to 5 wallets** | ✅ live | KH Direct Execution signed `distribute()` with the Para wallet (we never had its key); 1.000000 USDC moved exactly per the Bounty.sol fee schedule. Tx [`0xa06717e4…`](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) — [Spike 19 PASS](#spike-results) |
+| **SearXNG retrieval over MCP-over-AXL** | ✅ live | One AXL peer hosts a JSON-RPC router proxying SearXNG; another peer queries it via `POST /mcp/{peer}/searxng`. Real Google results ride the Yggdrasil mesh in 2.3s — [Spike 20 PASS](#spike-results) |
 | Cross-machine mesh (laptop TR ⇄ EU VPS) | ✅ live | Bidirectional `/send` ↔ `/recv` over Yggdrasil TLS round-trip, both peers in spanning tree — [Spike 2b PASS](#spike-results) |
 
 ---
@@ -323,7 +324,7 @@ For each, our positioning paragraph is in [`docs/sponsor-pitches.md`](./docs/spo
 
 ## Spike results
 
-Each spike is a small standalone script that verifies one architectural assumption against live infrastructure. **15 of 16 pass** with on-chain or live-API proof.
+Each spike is a small standalone script that verifies one architectural assumption against live infrastructure. **20 of 20 pass** with on-chain or live-API proof.
 
 | # | Spike | Status | Proof |
 |---|---|---|---|
@@ -345,6 +346,8 @@ Each spike is a small standalone script that verifies one architectural assumpti
 | 16 | **Bounty.submitSynthesis fires LZ atomically (V2)** | ✅ PASS | V2 factory + payable submitSynthesis dispatches `notifyCompletion` in one tx — GUID `0x6cfdf46b…`. |
 | 17 | **Full E2E** (single-process orchestrator) | ✅ PASS | Single script: 7 attested 0G inferences + 7 0G Storage refs + bounty lifecycle + LZ V2 — GUID `0x82fcb3f2…`. |
 | 18 | **Multi-process choreography** | ✅ PASS | 5 OS processes / 5 AXL nodes / 5 0G Compute ledgers / 5 operator wallets. 16 distinct chain txs from 5 signers in one bounty. Synth fires LZ V2 atomically — GUID `0x0c6eb880…`. |
+| 19 | **Real Circle USDC payout to 5 wallets** | ✅ PASS | KH Direct Execution signed `PaymentRouter.distribute(...)` with the Para wallet; 1.000000 USDC split exactly per the Bounty fee schedule across 5 distinct operator wallets in 0.7s. Tx `0xa06717e4…`. |
+| 20 | **SearXNG retrieval over MCP-over-AXL** | ✅ PASS | One AXL peer hosts a JSON-RPC router (`infra/axl-node-b/searxng-mcp-router.js`) proxying SearXNG; another peer queries it via `POST /mcp/{peer}/searxng` and gets real Google/Bing/DuckDuckGo results back. Round-trip via Yggdrasil TLS overlay in 2.3s. Closes Spike 3's MCP-over-AXL transport with a real production tool. |
 
 Full artifacts: [`docs/spike-artifacts/`](./docs/spike-artifacts/).
 

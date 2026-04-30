@@ -1,0 +1,51 @@
+{
+  "spike": 20,
+  "name": "SearXNG retrieval over MCP-over-AXL",
+  "completedAt": "2026-04-30T18:51:03.697Z",
+  "elapsedMs": 2349,
+  "transport": {
+    "caller": {
+      "axlNode": "axl-node-a",
+      "apiPort": 9002
+    },
+    "host": {
+      "axlNode": "axl-node-b",
+      "apiPort": 9012,
+      "routerPort": 9003
+    },
+    "hostPeerId": "55f1e064715029ee79b7f173181f3f43e329c0d74249c49dfa7e1ec870c14a5b",
+    "mcpUrl": "/mcp/55f1e064715029ee…/searxng"
+  },
+  "upstream": {
+    "searxngEndpoint": "http://127.0.0.1:8888",
+    "query": "LayerZero V2 vs Wormhole security model 2026",
+    "resultCount": 5,
+    "topResults": [
+      {
+        "title": "The KelpDAO Observation-Layer Exploit: $291M Released on a ...",
+        "url": "https://www.hypernative.io/blog/the-kelpdao-observation-layer-exploit-291m-released-on-a-message-that-never-existed",
+        "engine": "google"
+      },
+      {
+        "title": "Blockchain Bridge Security Comparison: Trust Models and Track Records",
+        "url": "https://www.spark.money/tools/bridge-security-comparison",
+        "engine": "google"
+      },
+      {
+        "title": "Best ETH Bridge in 2026: Fees, Speed, and Security Compared",
+        "url": "https://symbiosis.finance/blog/best-eth-bridge-in-2026-fees-speed-and-security-compared",
+        "engine": "google"
+      },
+      {
+        "title": "Wormhole vs LayerZero: 2026 | In-Depth Comparison (Max 60 chars)",
+        "url": "https://chainscorelabs.com/en/comparisons/layer-2-appchains-vs-general-purpose/interoperability-options/wormhole-vs-layerzero-2026",
+        "engine": "duckduckgo"
+      },
+      {
+        "title": "Cross-Chain Reality: Are We Finally Solving Interoperability?",
+        "url": "https://nagayaofficial.medium.com/cross-chain-reality-are-we-finally-solving-interoperability-fa92c1874a79",
+        "engine": "startpage"
+      }
+    ]
+  }
+}
