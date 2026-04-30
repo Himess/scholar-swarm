@@ -94,7 +94,17 @@ The user gets a research report where every statement traces back to a fetched U
 
 ## The five agents (live iNFTs on 0G Galileo)
 
-Five **ERC-7857 iNFTs** minted to five distinct operator wallets at `AgentNFT` [`0x68c0175e9d9C6d39fC2278165C3Db93d484a5361`](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) — Planner-Alpha, Researcher-One, Researcher-Two, Critic-Prime, Synthesizer-Final. Each holds AES-256-GCM encrypted role definition + system prompt with the merkle root committed in `iNFT.intelligenceRoot`. Visual roster (operator wallets, storage roots, mint + transfer tx): [scholar-swarm.vercel.app/agents](https://scholar-swarm.vercel.app/agents). Mint artifact: [`docs/spike-artifacts/minted-agents.json`](./docs/spike-artifacts/minted-agents.json) · roundtrip code: [`scripts/mint-agents.ts`](./scripts/mint-agents.ts).
+Five **ERC-7857 iNFTs** minted to five distinct operator wallets at `AgentNFT` [`0x68c0175e9d9C6d39fC2278165C3Db93d484a5361`](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361). Each holds AES-256-GCM encrypted role definition + system prompt with the merkle root committed in `iNFT.intelligenceRoot`.
+
+| iNFT | Role | Token detail on 0Gscan |
+|---|---|---|
+| #1 Planner-Alpha | Planner | [`/instance/1`](https://chainscan-galileo.0g.ai/token/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361/instance/1) |
+| #2 Researcher-One | Researcher | [`/instance/2`](https://chainscan-galileo.0g.ai/token/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361/instance/2) |
+| #3 Researcher-Two | Researcher | [`/instance/3`](https://chainscan-galileo.0g.ai/token/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361/instance/3) |
+| #4 Critic-Prime | Critic | [`/instance/4`](https://chainscan-galileo.0g.ai/token/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361/instance/4) |
+| #5 Synthesizer-Final | Synthesizer | [`/instance/5`](https://chainscan-galileo.0g.ai/token/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361/instance/5) |
+
+Visual gallery (operator wallets, intelligence roots, mint + transfer tx): [scholar-swarm.vercel.app/agents](https://scholar-swarm.vercel.app/agents). Mint artifact: [`docs/spike-artifacts/minted-agents.json`](./docs/spike-artifacts/minted-agents.json) · roundtrip code: [`scripts/mint-agents.ts`](./scripts/mint-agents.ts).
 
 ---
 

@@ -129,6 +129,8 @@ export const INFRA: Sponsor[] = [
 // Explorer URL helpers
 export const ogTx = (h: string) => `https://chainscan-galileo.0g.ai/tx/${h}`;
 export const ogAddr = (a: string) => `https://chainscan-galileo.0g.ai/address/${a}`;
+export const ogToken = (contract: string, tokenId: number | string) =>
+  `https://chainscan-galileo.0g.ai/token/${contract}/instance/${tokenId}`;
 export const baseTx = (h: string) => `https://sepolia.basescan.org/tx/${h}`;
 
 // Truncation helpers (visual `0x…last4` pattern)
