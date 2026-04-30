@@ -1,5 +1,6 @@
 import Nav from "@/components/Nav";
 import SponsorStrip from "@/components/SponsorStrip";
+import LiveBadge from "@/components/LiveBadge";
 
 export default function HomePage() {
   return (
@@ -9,6 +10,9 @@ export default function HomePage() {
         <section className="relative">
           <div className="hero-glow" />
           <div className="relative max-w-page mx-auto px-8 pt-20 pb-10">
+            <div className="flex justify-center mb-6">
+              <LiveBadge />
+            </div>
             <div className="text-center mb-7">
               <div className="kicker mb-5">Post a research bounty</div>
               <h1 className="h-display" style={{ fontSize: "clamp(44px,5.4vw,72px)" }}>

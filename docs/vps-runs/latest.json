@@ -1,0 +1,16 @@
+{
+  "_comment": "Latest auto-bounty completed by the live VPS swarm. Updated by /opt/scholar-swarm/scripts/vps-cron-bounty.sh every 6 hours. Frontend reads this file via raw.githubusercontent.com to render the 'Last live run' badge.",
+  "vpsHost": "roil-devnet (EU)",
+  "lastSuccessful": {
+    "bountyId": 25,
+    "bountyAddress": "0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75",
+    "completedAt": "2026-04-30T09:07:47.798Z",
+    "elapsedSeconds": 285.1,
+    "finalReportRoot": "0x3c5fb7ec2b1f9d6c286538cf0dcfd2e0132820835982df33c5066693423c92f0",
+    "createBountyTx": "0x0072199919a19eb2641fd6a2b6e337f1a4be531146cbcfefc6b9c5ab0b5d595c",
+    "acceptPlannerTx": "0x46ec4aefcdb93b9945e1be9990652e403d082f0d683ee36307be384746e38fea",
+    "explorer": "https://chainscan-galileo.0g.ai/address/0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75"
+  },
+  "totalRunsToday": 1,
+  "deploymentNote": "5 AXL nodes + 5 agent runtimes managed by systemd, restart=always. SearXNG on the same host serves retrieval. Cron triggers a fresh bounty every 6 hours."
+}
