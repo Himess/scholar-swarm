@@ -470,7 +470,7 @@ Everything in [`docs/ai-collaboration/`](./docs/ai-collaboration/):
 | [`conversation-log.md`](./docs/ai-collaboration/conversation-log.md) | Direct excerpts from Claude Web/Code sessions where the human pushed back, redirected, or rejected a proposal |
 | [`README.md`](./docs/ai-collaboration/README.md) | Folder index + how to read these artifacts together |
 
-Commit history is also part of the audit. **36 commits across the build window** (2026-04-27 to 2026-04-30, 17 / 8 / 5 / 6 commits per day respectively), each with an explicit topic and a body that describes the change. No "AI dump" commits — the largest is the Day 0-3 initial scaffold (`0e7e8b2`), labeled honestly with that exact phrase in its commit message.
+Commit history is also part of the audit. **46 commits across the build window** (2026-04-27 to 2026-04-30, 17 / 8 / 5 / 16 commits per day respectively — Day 10 spiked during the final polish push), each with an explicit topic and a body that describes the change. No "AI dump" commits — the largest is the Day 0-3 initial scaffold (`0e7e8b2`), labeled honestly with that exact phrase in its commit message.
 
 ---
 

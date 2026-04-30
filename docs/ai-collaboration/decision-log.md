@@ -238,4 +238,63 @@
 
 ---
 
-_Add new entries Day 8+ as decisions land. Format: D-number, decision, alternatives, why, made-by + date._
+## D16 — Live VPS deployment with cron auto-bounty cadence (over single-machine demo only)
+
+**Decision:** On Day 10, promote the swarm from "runs on the laptop when we run it" to "continuously running on the EU VPS — five `scholar-axl-*` + five `scholar-agent-*` systemd units (Restart=always), with a cron at `/etc/cron.d/scholar-swarm` firing `pnpm spike:18:cli` every six hours and auto-pushing `docs/vps-runs/latest.json` via a write-scoped GitHub deploy key". Frontend reads the artifact and renders a pulsing "VPS swarm live" badge.
+
+**Alternatives considered:**
+- Single-machine demo only — runs at video record time, dies otherwise.
+- Same VPS but manual run only — no cron, judges see the live URL but no recent activity.
+
+**Why live + cron:**
+- "Continuously deployed" is the strongest possible signal that the swarm isn't a one-shot demo. By submission time the LiveBadge would have shown 4-5 successful auto-runs across multiple cron windows, each with on-chain proof.
+- The artifact (`vps-runs/latest.json`) becomes a real-time judge-verifiable receipt — they can click the badge any time and see the most recent bounty hash.
+- The auto-push is single-repo, single-file, write-scoped — operationally minimal, blast radius bounded. Post-submission cleanup TODO in memory.
+
+**Trade-off:** Adds a write-scoped deploy key + 5 long-running systemd units to maintain. Justified by how much harder "live for 4 days" is to fake than "ran once during recording".
+
+**Made by:** Semih, Day 10 (2026-04-30), after Spike 18 PASS landed and the question became "does the proof age out by submission time".
+
+---
+
+## D17 — Real Circle USDC end-to-end (Spike 19), not mock USDC
+
+**Decision:** When the LZ-fires-LZ proof landed (Spike 16), the cross-chain message was provably arriving on Base Sepolia but no real ERC-20 was moving — the bounty escrow was holding 0 USDC at runtime. Day 10 question: ship a "mock USDC" path that just pretends, or do the real Circle USDC dance through KeeperHub's Direct Execution layer?
+
+**Alternatives considered:**
+- Deploy a `MockUSDC.sol` we control, mint to bounty, "distribute".
+- Skip the payment layer entirely — pitch ends at "LZ message landed".
+- Real Circle USDC + KH Direct Execution.
+
+**Why real Circle USDC:**
+- The whole pitch is "no trusted bot in the critical path". A mock USDC contract we own is a different kind of trusted bot — judges will see "you minted yourself the money you paid yourself".
+- KH's Para wallet whitelisted on `PaymentRouter` is the actual production pattern. The keeper signs `distribute()`; we never hold its key. That's a meaningful architectural property.
+- Spike 19 produces a single click-to-verify Basescan tx (`0xa06717e4…`) showing 1.000000 USDC moving across 5 distinct operator wallets in 0.7 s. That's the cleanest one-line proof in the entire submission.
+
+**Trade-off:** Cost ~1 USDC + ~0.001 ETH gas on Base Sepolia, ~3 hours of integration time (faucet, approve, fund, KH workflow trigger, verify deltas). Worth it for the unambiguous proof artifact.
+
+**Made by:** Semih, Day 10 (2026-04-30), morning of polish day.
+
+---
+
+## D18 — Spike 20 (SearXNG over MCP-over-AXL) instead of accepting a fuzzy AXL pitch
+
+**Decision:** On Day 10 evening, while reviewing draft sponsor-pitches.md text, caught that the AXL pitch was claiming "MCP-over-AXL pattern so one Researcher's locally-hosted SearXNG retrieval serves all agents through the mesh" — but the actual production code reached SearXNG through an SSH tunnel (Spike 15), not through MCP-over-AXL (Spike 3, mock router). Two separate proofs being implicitly conflated. Decided to spend ~1 hour writing Spike 20 instead of accepting the fuzzy phrasing.
+
+**Alternatives considered:**
+- Reword the pitch to honestly position MCP-over-AXL and SearXNG as separate proofs.
+- Switch production retrieval to MCP-over-AXL (~3 hours, risks breaking the live cron).
+- Write a small Spike 20 that proves SearXNG-over-AXL with a real router, document it as a standalone proof, and let production keep using SSH tunnel.
+
+**Why Spike 20:**
+- Pitch becomes literally true: "real Google/Bing/DuckDuckGo results returned to a peer through the Yggdrasil mesh in 2.3 s". No qualifications, no "in principle".
+- 1-hour cost vs the 3-hour cost of switching production. Doesn't risk the live VPS cron-driven bounty pipeline.
+- The new `searxng-mcp-router.js` is a working reference for anyone wanting to plug a local tool into AXL — strengthens the SDK story too.
+
+**Trade-off:** Spent the hour on Spike 20 instead of starting the demo video recording 1 hour earlier.
+
+**Made by:** Semih, Day 10 (2026-04-30) evening, after the user pushed back on the previous "two separate proofs" framing.
+
+---
+
+_Add new entries Day 11+ as decisions land. Format: D-number, decision, alternatives, why, made-by + date._
