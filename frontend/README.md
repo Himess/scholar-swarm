@@ -4,7 +4,7 @@ A **demo-mode visual frontend** for [Scholar Swarm](https://github.com/Himess/sc
 
 > One-line pitch: *"AutoGPT for serious research — five specialist iNFT agents that fetch real sources, verify each other's claims, and run on TEE-attested inference."*
 
-This is **not** a fully functional dApp — there is no wallet connect, no contract writes, no backend. It's a polished, static visual layer that mirrors **real on-chain state** from our Spike 18 + Spike 19 PASS runs and links out to actual block explorers (Basescan, 0Gscan) for verification.
+This is **not** a fully functional dApp — there is no wallet connect, no contract writes, no backend. It's a polished, static visual layer that mirrors **real on-chain state** from our Spike 18 (multi-process bounty choreography) + Spike 19 (Circle USDC payout) + Spike 20 (SearXNG retrieval over MCP-over-AXL) PASS runs and links out to actual block explorers (Basescan, 0Gscan) for verification.
 
 ## Routes
 
@@ -15,7 +15,7 @@ The `[id]` route param is currently unused — every bounty resolves to the same
 
 ## Stack
 
-- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
 - **Tailwind CSS v3** (custom design tokens in `tailwind.config.ts` + `app/globals.css`)
 - **Framer Motion** (timeline node entry animation)
 - **next/font/google** (Inter + JetBrains Mono)

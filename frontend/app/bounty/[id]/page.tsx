@@ -22,7 +22,7 @@ export default function BountyDetailPage() {
                   <Link href="/" className="ext-link">←</Link>
                   <Link href="/" className="ext-link uppercase tracking-[0.14em]">Bounties</Link>
                   <span>·</span>
-                  <span className="text-fg-dim">#{BOUNTY.id} (Day-9 canonical PASS)</span>
+                  <span className="text-fg-dim">#{BOUNTY.id} (canonical PASS run)</span>
                 </div>
                 <a
                   href="https://chainscan-galileo.0g.ai/address/0xA0b83019181144529d202baa2E7391E42c4C9502"

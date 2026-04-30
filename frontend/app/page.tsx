@@ -45,7 +45,7 @@ export default function HomePage() {
                 <div className="kicker mb-2 flex items-center justify-between">
                   <span>Research goal</span>
                   <span className="text-fg-faint normal-case tracking-normal font-mono">
-                    prefilled · spike 18
+                    prefilled · canonical demo bounty
                   </span>
                 </div>
                 <textarea

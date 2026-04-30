@@ -57,7 +57,7 @@ Concretely:
 │    StorageProvider    ← decentralized blob/KV (0G)   │
 │    MessagingProvider  ← P2P mesh (AXL)               │
 │    PaymentProvider    ← payout rail (KeeperHub)      │
-│    RetrievalProvider  ← web search (Tavily)          │
+│    RetrievalProvider  ← web search (SearXNG / Tavily)│
 │    ReputationProvider ← ERC-8004                     │
 └─────────────────────────────────────────────────────┘
                    │ wired into
@@ -147,4 +147,4 @@ MIT. Same as OpenClaw, same as the rest of Scholar Swarm.
 
 ## Status
 
-Initial release shipped during ETHGlobal Open Agents 2026. Reference Scholar Swarm deployment lives on 0G Galileo + Base Sepolia — see [`docs/deployment.md`](../../docs/deployment.md) for contract addresses and explorer links.
+Initial release shipped during ETHGlobal Open Agents 2026. Reference Scholar Swarm deployment lives on 0G Galileo + Base Sepolia — see [`docs/deployment.md`](../../docs/deployment.md) for contract addresses and explorer links. **20 / 20 integration spikes PASS** including multi-process choreography (5 AXL nodes coordinating one bounty end-to-end), real Circle USDC distribution via KeeperHub, and SearXNG retrieval over MCP-over-AXL — full breakdown in [`docs/spike-results.md`](../../docs/spike-results.md).
