@@ -53,34 +53,38 @@ Comprehensive spike-by-spike breakdown with every transition tx hash: [`docs/spi
 ## How it works (one bounty, end-to-end)
 
 ```
-USER posts a research bounty                  →  Bounty contract on 0G Galileo
-PLANNER (iNFT #1) decomposes into 3 sub-tasks →  attested by 0G Compute
-RESEARCHERS (iNFT #2 + #3) bid on sub-tasks   →  reputation-weighted selection
-        ↓
-   each fetches real web sources via SearXNG (or Tavily — swappable)
-   produces source-attributed claims
-   stores findings on 0G Storage (merkle root)
-        ↓
-CRITIC (iNFT #4) reviews each claim:
-   • HTTP-fetches every cited URL
-   • runs separate attested LLM check on excerpt vs claim
-   • approves or rejects with stored rationale
-        ↓
-SYNTHESIZER (iNFT #5) produces the final report
-   • integrates only critic-approved findings
-   • stored on 0G Storage, root committed on-chain
-        ↓
-THE CONTRACT FIRES THE PAYOUT — no relayer
-   • Bounty.submitSynthesis(reportRoot) is payable; the Bounty itself
-     atomically calls BountyMessenger.notifyCompletion via LayerZero V2
-   • Base counterpart emits DistributeRequested(guid, bountyId, recipients[], amounts[])
-   • KeeperHub workflow nepsavmovlyko0luy3rpi watches the event and calls
-     PaymentRouter.distribute() — gas estimation, retry, audit log
-   • Circle USDC lands in five distinct agent wallets on Base — proven
-     on-chain in Spike 19, distribute tx 0xa06717e4… (~0.7 s after KH
-     trigger). The keeper signing distribute() is KH's Para wallet; we
-     never had its key.
+┌─ stage 1 · post ─────────────────────────────────────────────┐
+│  USER posts a research bounty                                │
+│    → Bounty contract clone created on 0G Galileo             │
+└──────────────────────────────────────────────────────────────┘
+                               ▼
+┌─ stage 2 · plan ─────────────────────────────────────────────┐
+│  PLANNER (iNFT #1) decomposes into 3 sub-tasks               │
+│    → reasoning attested by 0G Compute (TEE / dstack)         │
+└──────────────────────────────────────────────────────────────┘
+                               ▼
+┌─ stage 3 · research ─────────────────────────────────────────┐
+│  RESEARCHERS (iNFT #2 + #3) bid; reputation-weighted pick    │
+│    • each fetches real sources via SearXNG (Tavily swappable)│
+│    • source-attributed claims                                │
+│    • findings stored on 0G Storage, merkle root on-chain     │
+└──────────────────────────────────────────────────────────────┘
+                               ▼
+┌─ stage 4 · verify ───────────────────────────────────────────┐
+│  CRITIC (iNFT #4) reviews each claim:                        │
+│    • HTTP-fetches every cited URL                            │
+│    • independent attested LLM check: does excerpt support?   │
+│    • per-claim rationale stored on 0G, reasonURI on-chain    │
+└──────────────────────────────────────────────────────────────┘
+                               ▼
+┌─ stage 5 · synthesize + fire payout (one tx) ────────────────┐
+│  SYNTHESIZER (iNFT #5) integrates approved findings only,    │
+│  calls Bounty.submitSynthesis(reportRoot){value: lzFee}      │
+│    → SAME TX atomically dispatches BountyMessenger via LZ V2 │
+└──────────────────────────────────────────────────────────────┘
 ```
+
+**The contract fires the payout — no relayer.** `Bounty.submitSynthesis` is `payable`; the Bounty itself atomically calls `BountyMessenger.notifyCompletion` in the same tx as the status flip to Completed. On Base, `PaymentMessenger._lzReceive` decodes the message and emits `DistributeRequested(guid, bountyId, recipients[], amounts[])`. KeeperHub workflow [`nepsavmovlyko0luy3rpi`](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) watches that event and calls `PaymentRouter.distribute()` — gas estimation, retry, full audit log. Circle USDC lands in five distinct agent wallets on Base, proven in [Spike 19 distribute tx `0xa06717e4…`](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) (~0.7s after KH trigger). The keeper signing `distribute()` is KH's Para wallet — we never had its key.
 
 Run the whole pipeline yourself with `pnpm spike:17` (proven on testnet — see [Spike 17](#spike-results)).
 
@@ -117,19 +121,9 @@ Frontend source: [`frontend/`](./frontend/) — Next.js 16 + Tailwind + Framer M
 
 ---
 
-## What this repo contains
-
-Two distinct deliverables:
-
-1. **`@scholar-swarm/sdk`** — a swarm-first agent framework in the OpenClaw family. Code-first `Role` + `Provider` model, designed for **N agents coordinating one workflow**. Domain-agnostic, MIT licensed. Full details in [`packages/swarm-sdk/README.md`](./packages/swarm-sdk/README.md).
-
-2. **Scholar Swarm itself** — the reference application built on the SDK. Five agent runtimes, six smart contracts, two LayerZero V2 OApps, integration adapters for 0G + AXL + KeeperHub.
-
-The SDK is what other teams could fork to build their own swarms — code-review swarms, legal-analysis swarms, investigative-journalism swarms. Scholar Swarm is the example.
-
----
-
 ## Status — what's working today
+
+> **Two deliverables in one repo:** [`@scholar-swarm/sdk`](./packages/swarm-sdk/README.md) — a swarm-first agent framework in the OpenClaw family (N agents ⇄ 1 workflow, MIT, domain-agnostic) — and **Scholar Swarm itself**, the reference research application built on it (5 agent runtimes, 11 contracts, 2 LZ V2 OApps, 0G + AXL + KH adapters). Other teams fork the SDK to build code-review, legal-analysis, or investigative-journalism swarms.
 
 | Capability | Status | Proof |
 |---|---|---|
@@ -164,26 +158,36 @@ Scholar Swarm runs on two chains because each one does a job the other can't.
 
 The two are stitched by a **trustless** cross-chain link (LayerZero V2), not a bot. See [§ Cross-chain payment via LayerZero V2](#cross-chain-payment-via-layerzero-v2).
 
-```
-┌──────────  0G Galileo  ──────────┐                ┌────────  Base Sepolia  ────────┐
-│                                  │                │                                │
-│  AgentNFT (5 iNFTs minted)       │                │  PaymentRouter (USDC escrow)   │
-│  ReputationRegistry (ERC-8004)   │                │  PaymentMessenger (LZ V2)      │
-│  ArtifactRegistry                │                │                                │
-│  BountyFactory + Bounty (impl)   │  LZ V2 message │                                │
-│  BountyMessenger (LZ V2)         │ ◀────────────▶ │     ▲                          │
-│                                  │  DVN-attested  │     │                          │
-│  0G Compute  →  TeeML/dstack     │                │     │ KeeperHub                │
-│  0G Storage  →  KV + log + blob  │                │     │ Direct Execution API     │
-│                                  │                │     │ (gas + retry + audit)    │
-└──────────────────────────────────┘                └─────│──────────────────────────┘
-                                                          │
-                                              ┌───────────┴────────────┐
-                                              │  AXL P2P mesh           │
-                                              │  Planner ⇄ R1 ⇄ R2 ⇄    │
-                                              │  Critic ⇄ Synthesizer   │
-                                              │  + MCP-over-AXL tools   │
-                                              └─────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph mesh["AXL P2P mesh · Yggdrasil overlay · 5 agents coordinate here"]
+      direction LR
+      P((Planner)) --- R1((R1)) --- R2((R2)) --- C((Critic)) --- S((Synth))
+    end
+
+    subgraph og["0G Galileo · chain 16602 · the economy"]
+      direction TB
+      og_id["AgentNFT<br/>ERC-7857 + ERC-8004"]
+      og_b["BountyFactory + Bounty impl V2<br/>payable submitSynthesis fires LZ atomically"]
+      og_msg["BountyMessenger<br/>LZ V2 OApp"]
+      og_inf["0G Compute · TEE-attested<br/>0G Storage · merkle-rooted"]
+      og_id --> og_b --> og_msg
+      og_inf -.-> og_b
+    end
+
+    subgraph base["Base Sepolia · chain 84532 · the money"]
+      direction TB
+      base_msg["PaymentMessenger<br/>LZ V2 OApp"]
+      base_pr["PaymentRouter<br/>USDC escrow + multi-distribute"]
+      base_msg --> base_pr
+    end
+
+    kh[/"KeeperHub<br/>Direct Execution API<br/>gas · retry · audit log"\]
+
+    mesh -.->|"agents sign on-chain actions"| og
+    og_msg <==>|"LZ V2 · DVN-attested · ~40s"| base_msg
+    base_msg -.->|"emits DistributeRequested"| kh
+    kh ==>|"signs distribute()"| base_pr
 ```
 
 ## Smart contracts on 0G
@@ -364,53 +368,12 @@ The two are complementary. Full primitives + adapter list in [`packages/swarm-sd
 
 ---
 
-## Repo layout
-
-```
-scholar-swarm/
-├── README.md                          ← you are here
-├── PLAN.md                            ← execution plan, scope lock, spikes
-├── package.json                       ← pnpm workspace root
-│
-├── contracts/                         ← Foundry, Solc 0.8.27 + via_ir
-│   ├── src/
-│   │   ├── AgentNFT.sol               ← ERC-7857 + ERC-8004 unified
-│   │   ├── ReputationRegistry.sol
-│   │   ├── ArtifactRegistry.sol
-│   │   ├── Bounty.sol  ·  BountyFactory.sol
-│   │   ├── PaymentRouter.sol          ← Base Sepolia
-│   │   ├── BountyMessenger.sol        ← LZ V2 OApp on 0G
-│   │   ├── PaymentMessenger.sol       ← LZ V2 OApp on Base
-│   │   └── interfaces/
-│   ├── test/                          ← 42 tests, all pass
-│   └── script/                        ← Deploy0G, DeployBase, DeployMessengers0G, DeployBountyV2, DeployRoyaltyVault, WirePeers
-│
-├── packages/
-│   ├── shared/
-│   ├── swarm-sdk/                     ← The reusable framework
-│   ├── og-client/                     ← Inference + Storage adapters
-│   ├── axl-client/                    ← Messaging adapter
-│   ├── keeperhub-client/              ← Payment (REST) + MCP (Streamable HTTP) adapters
-│   └── mcp-tools/                     ← Tavily + SearXNG RetrievalProvider impls
-│
-├── apps/
-│   ├── agent-planner/  ·  agent-researcher/
-│   ├── agent-critic/   ·  agent-synthesizer/
-│   └── frontend/                      ← Day 9-10
-│
-├── scripts/                           ← spike-01…17 + mint-agents + topup-operators
-├── infra/                             ← AXL nodes, mock MCP router
-└── docs/                              ← deployment.md, axl-vps-setup.md, sponsor-reference.md, spike-results.md, spike-artifacts/, ai-collaboration/
-```
-
----
-
 ## Quick start
 
 > Requires Node 20+, pnpm 9+, Foundry, and a 0G Galileo testnet wallet with at least 5 OG. The Discord faucet at https://discord.gg/0glabs grants this on request.
 
 ```bash
-git clone https://github.com/Himess/scholar-swarm   # public Day 11
+git clone https://github.com/Himess/scholar-swarm
 cd scholar-swarm
 pnpm install
 forge install --root contracts
@@ -433,6 +396,8 @@ pnpm mint:agents   # mint the 5 iNFTs to your wallet
 cd infra/axl-node-a && ./node.exe -config node-config.json &
 cd infra/axl-node-b && ./node.exe -config node-config.json &
 ```
+
+**Layout:** `contracts/` (Foundry, Solc 0.8.27 + via_ir, 42 tests) · `packages/{shared,swarm-sdk,og-client,axl-client,keeperhub-client,mcp-tools}` · `apps/{agent-planner,agent-researcher,agent-critic,agent-synthesizer,frontend}` · `scripts/` (spike-01…19 + mint-agents + topup-operators + vps-cron-bounty.sh) · `infra/` (AXL nodes, mock MCP router) · `docs/` (deployment, axl-vps-setup, spike-results, spike-artifacts, ai-collaboration, demo-video, vps-runs, day-by-day).
 
 Full deployment instructions and on-chain addresses in [`docs/deployment.md`](./docs/deployment.md).
 
@@ -508,21 +473,7 @@ Commit history is also part of the audit. **36 commits across the build window**
 
 ## Day-by-day
 
-| Day | Date | Highlights |
-|---|---|---|
-| 0 | 2026-04-24 | Stake, Discord, plan locked |
-| 1 | 2026-04-25 | Monorepo, 10 workspace stubs |
-| 2 | 2026-04-26 | Sponsor SDK research, 508KB 0G docs archived |
-| 3 | 2026-04-27 | 6 contracts deployed on 0G + 1 on Base; 34 tests pass; Spike 1, 4, 5 PASS |
-| 4 | 2026-04-27 | OpenClaw SDK framing, 5 iNFTs minted, AXL mesh + MCP-over-AXL PASS, KH MCP client (26 tools), LZ V2 OApps written |
-| 5 | 2026-04-27 | LZ deploy + peer wiring + first cross-chain message (Spike 9); 5 distinct operator wallets; iNFT royalty hook (Spike 10) |
-| 6 | 2026-04-27 | Bounty lifecycle E2E (Spike 11) + Synth → LZ pipeline (Spike 12); KH workflow drafted via MCP (Spike 13) and persisted live (Spike 14) |
-| 7 | 2026-04-28 | Tavily retrieval adapter + Bounty.sol auto-fires LZ on synthesis (Spike 16) + full E2E orchestrator (Spike 17) + AI-collaboration audit folder. |
-| 8 | 2026-04-28 | EU VPS AXL node deployed (systemd, ~2.4 MB RAM) + **Spike 2b PASS** — TR laptop ↔ EU VPS bidirectional Yggdrasil round-trip, both peers in spanning tree. |
-| 9 | 2026-04-29 | Tavily smoke test with real key (Spike 15) + frontend polish + single-machine E2E dry run with all real providers |
-| 10 | 2026-05-01 | Two-machine demo dry run (laptop TR + EU VPS) |
-| 11 | 2026-05-02 | Demo video record + README final + sponsor pitches + KH FEEDBACK.md |
-| 12 | 2026-05-03 | Submit (deadline: 19:00 TR / 12:00 ET) |
+12-day solo build window 2026-04-24 → 2026-05-03. Full per-day highlights table + commit cadence in [`docs/day-by-day.md`](./docs/day-by-day.md). Granular blockers/unblockers in [`docs/ai-collaboration/day-by-day-notes.md`](./docs/ai-collaboration/day-by-day-notes.md).
 
 ---
 
