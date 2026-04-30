@@ -326,6 +326,8 @@ pnpm spike:16   # Bounty.submitSynthesis fires LZ atomically
 pnpm spike:17   # E2E orchestrator — one script, real providers, real cross-chain
 pnpm spike:18   # Multi-process choreography — runs 5 AXL nodes + 5 agents
 # (in another terminal) pnpm spike:18:cli  # post a bounty + observe the swarm
+pnpm spike:19   # Real Circle USDC payout to 5 wallets via KH Direct Execution
+pnpm spike:20   # SearXNG retrieval over MCP-over-AXL (real Google results, no SSH tunnel)
 
 pnpm mint:agents   # mint the 5 iNFTs to your wallet
 
@@ -334,7 +336,7 @@ cd infra/axl-node-a && ./node.exe -config node-config.json &
 cd infra/axl-node-b && ./node.exe -config node-config.json &
 ```
 
-**Layout:** `contracts/` (Foundry, Solc 0.8.27 + via_ir, 42 tests) · `packages/{shared,swarm-sdk,og-client,axl-client,keeperhub-client,mcp-tools}` · `apps/{agent-planner,agent-researcher,agent-critic,agent-synthesizer,frontend}` · `scripts/` (spike-01…19 + mint-agents + topup-operators + vps-cron-bounty.sh) · `infra/` (AXL nodes, mock MCP router) · `docs/` (deployment, axl-vps-setup, spike-results, spike-artifacts, ai-collaboration, demo-video, vps-runs, day-by-day).
+**Layout:** `contracts/` (Foundry, Solc 0.8.27 + via_ir, 42 tests) · `packages/{shared,swarm-sdk,og-client,axl-client,keeperhub-client,mcp-tools}` · `apps/{agent-planner,agent-researcher,agent-critic,agent-synthesizer}` · `frontend/` (Next.js 16 demo app) · `scripts/` (spike-01…20 + mint-agents + topup-operators + vps-cron-bounty.sh) · `infra/` (5 AXL nodes per agent role + axl-node-{a,b} for the SearXNG-MCP router on Spike 20) · `docs/` (deployment, axl-vps-setup, spike-results, spike-artifacts, ai-collaboration, demo-video, vps-runs, day-by-day, sponsor-pitches).
 
 Full deployment instructions and on-chain addresses in [`docs/deployment.md`](./docs/deployment.md).
 
