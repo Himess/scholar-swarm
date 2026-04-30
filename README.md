@@ -160,14 +160,14 @@ The two are stitched by a **trustless** cross-chain link (LayerZero V2), not a b
 
 ```mermaid
 flowchart TB
-    subgraph mesh["AXL P2P mesh · Yggdrasil overlay · 5 agents coordinate here"]
+    subgraph mesh["AXL P2P mesh · 5 SPECIALIST AGENTS · Yggdrasil overlay"]
       direction LR
-      P((Planner)) --- R1((R1)) --- R2((R2)) --- C((Critic)) --- S((Synth))
+      P((Planner<br/>plan)) --- R1((R1<br/>research)) --- R2((R2<br/>research)) --- C((Critic<br/>verify)) --- S((Synth<br/>synthesize))
     end
 
     subgraph og["0G Galileo · chain 16602 · the economy"]
       direction LR
-      og_id["AgentNFT<br/>ERC-7857 + ERC-8004"]
+      og_id["5 iNFTs minted (AgentNFT)<br/>ERC-7857 + ERC-8004<br/>encrypted intelligence on 0G Storage"]
       og_b["BountyFactory + Bounty impl V2<br/>payable submitSynthesis<br/>fires LZ atomically"]
       og_msg["BountyMessenger<br/>LZ V2 OApp"]
       og_inf["0G Compute · TEE-attested<br/>0G Storage · merkle-rooted"]
@@ -178,7 +178,7 @@ flowchart TB
     subgraph base["Base Sepolia · chain 84532 · the money"]
       direction LR
       base_msg["PaymentMessenger<br/>LZ V2 OApp"]
-      base_pr["PaymentRouter<br/>USDC escrow + multi-distribute"]
+      base_pr["PaymentRouter<br/>Real Circle USDC<br/>multi-wallet distribute"]
       base_msg --> base_pr
     end
 
