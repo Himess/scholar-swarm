@@ -499,8 +499,10 @@ Everything in [`docs/ai-collaboration/`](./docs/ai-collaboration/):
 | [`claude-code-feedback-v2.md`](./docs/ai-collaboration/claude-code-feedback-v2.md) | Claude Code's green-light on v2 + scope-management warnings |
 | [`decision-log.md`](./docs/ai-collaboration/decision-log.md) | 11 architectural decisions + alternatives + rationale, all attributed |
 | [`day-by-day-notes.md`](./docs/ai-collaboration/day-by-day-notes.md) | What happened each day, what blocked, what unblocked |
+| [`conversation-log.md`](./docs/ai-collaboration/conversation-log.md) | Direct excerpts from Claude Web/Code sessions where the human pushed back, redirected, or rejected a proposal |
+| [`README.md`](./docs/ai-collaboration/README.md) | Folder index + how to read these artifacts together |
 
-Commit history is also part of the audit. 22 GPG-signed commits, distributed across 8 days, each with an explicit topic and a body that describes the change. No "AI dump" commits — the largest is the Day 0-3 initial scaffold (`0e7e8b2`), labeled honestly.
+Commit history is also part of the audit. **36 commits across the build window** (2026-04-27 to 2026-04-30, 17 / 8 / 5 / 6 commits per day respectively), each with an explicit topic and a body that describes the change. No "AI dump" commits — the largest is the Day 0-3 initial scaffold (`0e7e8b2`), labeled honestly with that exact phrase in its commit message.
 
 ---
 
