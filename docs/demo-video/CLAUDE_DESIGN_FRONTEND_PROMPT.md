@@ -252,7 +252,7 @@ Each card: `--bg-elev`, border, radius 8px, padding 18px:
 Five cards in order Planner / R1 / R2 / Critic / Synthesizer with the amounts listed above.
 
 ### Footer band (full width, 60px)
-- Left: `15/19 spikes drawn from this run · Spike 18 + Spike 19` (mono, dim).
+- Left: `20 / 20 spikes pass · live data from Spike 18 + Spike 19 + Spike 20` (mono, dim).
 - Right: `BUILT WITH:` + 4 sponsor logos.
 
 ---

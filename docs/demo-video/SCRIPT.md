@@ -169,7 +169,7 @@
 **Optional accountability beat** (5s, plays at the end of the segment over the same three-row table or a brief "no slashing" badge overlay)
 
 **Voiceover (≈70 words):**
-> "Three sponsor integrations, all live on testnet. 0G — five iNFT agents, encrypted on 0G Storage, attested inference on 0G Compute. Gensyn AXL — five separate nodes, cross-ISP verified. KeeperHub — live workflow, point-seven-second payouts. Nineteen out of nineteen integration spikes pass. **We don't slash agents. Rejected work simply doesn't pay — accountability without locked capital.**"
+> "Three sponsor integrations, all live on testnet. 0G — five iNFT agents, encrypted on 0G Storage, attested inference on 0G Compute. Gensyn AXL — five separate nodes, cross-ISP verified, with real SearXNG retrieval routed through the mesh. KeeperHub — live workflow, point-seven-second payouts. Twenty out of twenty integration spikes pass. **We don't slash agents. Rejected work simply doesn't pay — accountability without locked capital.**"
 
 ---
 

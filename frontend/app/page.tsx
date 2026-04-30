@@ -169,7 +169,7 @@ export default function HomePage() {
       <footer className="w-full border-t border-soft mt-16" style={{ minHeight: 60 }}>
         <div className="max-w-page mx-auto px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="font-mono text-[12px] text-fg-faint tracking-[0.12em] uppercase">
-            19 / 19 spikes pass · live data from Spike 18 + Spike 19
+            20 / 20 spikes pass · live data from Spike 18 + Spike 19 + Spike 20
           </div>
           <div className="flex items-center gap-3">
             <span className="kicker-sm">Built with</span>

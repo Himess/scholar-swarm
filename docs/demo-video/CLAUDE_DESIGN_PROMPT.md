@@ -96,7 +96,7 @@ Right column (60% width):
 - Bullet list, 26px Inter Regular, leading 1.6:
   - Smart-contract security & FHE protocols background
   - Built **Scholar Swarm** in 10 days for this hackathon
-  - Solo · `19 / 19` integration spikes pass
+  - Solo · `20 / 20` integration spikes pass
 - Footer link: `github.com/Himess/scholar-swarm` — 18px JetBrains Mono, color `--accent`, underlined
 
 Webcam PIP placeholder top-right corner (same style as Slide 1).
