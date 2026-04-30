@@ -26,7 +26,7 @@ Three mechanisms make the difference:
 > 🟢 **Real testnet, not a simulation.** 1.000000 Circle USDC distributed across 5 distinct operator wallets in **0.7 seconds** via KeeperHub Direct Execution. KH's Para wallet signed `PaymentRouter.distribute()` — we never held its key. Click and verify: [tx `0xa06717e4…f0b7` on Base Sepolia](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7).
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 12 / 2026-04-30):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live · **continuously running on EU VPS with 6-hour auto-bounty cadence** ([latest run](./docs/vps-runs/latest.json)).
+**Status (Day 12 / 2026-04-30):** 9 contracts live on two chains (7 on 0G Galileo, 2 on Base Sepolia) · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live · **continuously running on EU VPS with 6-hour auto-bounty cadence** ([latest run](./docs/vps-runs/latest.json)).
 
 ---
 
@@ -123,7 +123,7 @@ Frontend source: [`frontend/`](./frontend/) — Next.js 16 + Tailwind + Framer M
 
 ## Status — what's working today
 
-> **Two deliverables in one repo:** [`@scholar-swarm/sdk`](./packages/swarm-sdk/README.md) — a swarm-first agent framework in the OpenClaw family (N agents ⇄ 1 workflow, MIT, domain-agnostic) — and **Scholar Swarm itself**, the reference research application built on it (5 agent runtimes, 11 contracts, 2 LZ V2 OApps, 0G + AXL + KH adapters). Other teams fork the SDK to build code-review, legal-analysis, or investigative-journalism swarms.
+> **Two deliverables in one repo:** [`@scholar-swarm/sdk`](./packages/swarm-sdk/README.md) — a swarm-first agent framework in the OpenClaw family (N agents ⇄ 1 workflow, MIT, domain-agnostic) — and **Scholar Swarm itself**, the reference research application built on it (5 agent runtimes, 9 contracts across 2 chains, 2 LZ V2 OApps, 0G + AXL + KH adapters). Other teams fork the SDK to build code-review, legal-analysis, or investigative-journalism swarms.
 
 | Capability | Status | Proof |
 |---|---|---|
@@ -192,7 +192,7 @@ flowchart TB
 
 ## Smart contracts on 0G
 
-Nine contracts on 0G Galileo:
+Seven core contracts on 0G Galileo (plus a `StubVerifier` mock for the ERC-7857 verifier slot, plus 2 archived V1 deployments preserved for [Spike 11](#spike-results) historical reference):
 
 | Contract | Address | Purpose |
 |---|---|---|
