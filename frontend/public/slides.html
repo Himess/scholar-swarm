@@ -137,6 +137,54 @@
     font-weight: 600;
     margin-right: 14px;
   }
+
+  /* Presentation mode — toggled by pressing F. Hides everything except the
+     current slide, scales it to viewport (preserving 1920×1080 aspect),
+     centers it, dims background. Klavye/space → next slide. */
+  body.present {
+    background: #000;
+    overflow: hidden;
+  }
+  body.present .slide {
+    display: none;
+    margin: 0;
+    box-shadow: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(var(--present-scale, 1));
+    transform-origin: center center;
+  }
+  body.present .slide.is-current {
+    display: block;
+  }
+  #slide-indicator {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    z-index: 9999;
+    backdrop-filter: blur(6px);
+  }
+  #slide-help {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    z-index: 9999;
+    backdrop-filter: blur(6px);
+    opacity: 0.7;
+  }
 </style>
 </head>
 <body>
@@ -549,6 +597,123 @@
     </div>
   </div>
 </section>
+
+<div id="slide-indicator">1 / 8</div>
+<div id="slide-help">F = Present · ←/→ = Slide · Esc = Exit</div>
+
+<script>
+  (function() {
+    const slides = Array.from(document.querySelectorAll('section.slide'));
+    const indicator = document.getElementById('slide-indicator');
+    const total = slides.length;
+    let current = 0;
+
+    function setCurrent(idx, scrollInto = false) {
+      current = Math.max(0, Math.min(total - 1, idx));
+      slides.forEach((s, i) => s.classList.toggle('is-current', i === current));
+      indicator.textContent = `${current + 1} / ${total}`;
+      if (scrollInto && !document.body.classList.contains('present')) {
+        slides[current].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function fitScale() {
+      // Slide is 1920×1080. Scale to fit viewport while preserving aspect.
+      const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      document.body.style.setProperty('--present-scale', String(scale));
+    }
+
+    function togglePresent() {
+      const isPresent = document.body.classList.toggle('present');
+      if (isPresent) {
+        fitScale();
+        setCurrent(current);
+        // Try real fullscreen too — best-effort, ignore if blocked
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        if (document.fullscreenElement) document.exitFullscreen?.();
+      }
+    }
+
+    function exitPresent() {
+      if (document.body.classList.contains('present')) {
+        document.body.classList.remove('present');
+        if (document.fullscreenElement) document.exitFullscreen?.();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      // Don't hijack typing inside inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'PageDown':
+        case ' ':
+          e.preventDefault();
+          setCurrent(current + 1, true);
+          break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          e.preventDefault();
+          setCurrent(current - 1, true);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setCurrent(current + 1, true);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setCurrent(current - 1, true);
+          break;
+        case 'Home':
+          e.preventDefault();
+          setCurrent(0, true);
+          break;
+        case 'End':
+          e.preventDefault();
+          setCurrent(total - 1, true);
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          togglePresent();
+          break;
+        case 'Escape':
+          exitPresent();
+          break;
+        default:
+          if (/^[1-9]$/.test(e.key)) {
+            const idx = parseInt(e.key, 10) - 1;
+            if (idx < total) {
+              e.preventDefault();
+              setCurrent(idx, true);
+            }
+          }
+      }
+    });
+
+    // Update current slide while scrolling in the non-present (review) mode
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entries) => {
+        if (document.body.classList.contains('present')) return;
+        for (const entry of entries) {
+          if (entry.intersectionRatio > 0.5) {
+            const idx = slides.indexOf(entry.target);
+            if (idx >= 0) setCurrent(idx, false);
+          }
+        }
+      }, { threshold: [0.5] });
+      slides.forEach((s) => obs.observe(s));
+    }
+
+    window.addEventListener('resize', () => {
+      if (document.body.classList.contains('present')) fitScale();
+    });
+
+    setCurrent(0);
+  })();
+</script>
 
 </body>
 </html>
