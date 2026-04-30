@@ -141,7 +141,7 @@ export default function HomePage() {
                     n: 2,
                     kicker: "Verify",
                     title: "Independent critic",
-                    body: "Critic re-fetches every cited URL via SearXNG and runs an independent attested LLM check on each claim.",
+                    body: "Critic re-fetches every cited URL via SearXNG — routed peer-to-peer through the AXL Yggdrasil mesh, no central tool host — and runs an independent attested LLM check on each claim.",
                   },
                   {
                     n: 3,
