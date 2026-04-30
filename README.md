@@ -241,7 +241,7 @@ KH integrates on **three surfaces** in this build:
 Gensyn AXL is the inter-agent backbone. Without AXL, a centralized message broker would replace it — defeating the *trustless multi-agent* claim.
 
 - **2-node local mesh verified** — peer ed25519 IDs `bddf078f…` ⇄ `55f1e064…`, "hello scholar swarm" delivered bidirectionally over Yggdrasil. ([Spike 2a PASS](#spike-results))
-- **MCP-over-AXL verified** — `POST /mcp/{peer_id}/{service}` round-trips through a mock router. This is the *peer-hosted tool* pattern that lets a Researcher's locally-hosted retrieval (SearXNG or Tavily) serve all agents through the mesh. ([Spike 3 PASS](#spike-results))
+- **MCP-over-AXL with a real production tool** — Spike 3 first proved the transport (`POST /mcp/{peer_id}/{service}` round-trip via mock router); **[Spike 20](#spike-results)** closes the loop with a real upstream tool: one peer hosts a JSON-RPC router proxying a live SearXNG instance, another peer queries it via `POST /mcp/{peer_id}/searxng` and gets real Google/Bing/DuckDuckGo results back through the Yggdrasil mesh in 2.3 s. No SSH tunnel between agents, no central tool host. Source: [`infra/axl-node-b/searxng-mcp-router.js`](./infra/axl-node-b/searxng-mcp-router.js) + [`scripts/spike-20-searxng-over-axl.ts`](./scripts/spike-20-searxng-over-axl.ts).
 - **`@scholar-swarm/axl-client`** — typed `AXLMessagingProvider` wrapping the local HTTP API at `:9002`.
 
 Cross-ISP test (Spike 2b, laptop-TR ⇄ EU VPS) **PASS Day 8** — bidirectional Yggdrasil round-trip with the same `/send` + `/recv` API path that `pnpm spike:03` exercises locally. Same code, one extra line in `Peers`.
