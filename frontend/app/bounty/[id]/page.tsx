@@ -17,11 +17,22 @@ export default function BountyDetailPage() {
           {/* Header band */}
           <div className="border-b border-soft">
             <div className="max-w-page mx-auto px-8 py-7">
-              <div className="flex items-center gap-2 font-mono text-[12px] text-fg-faint mb-4">
-                <Link href="/" className="ext-link">←</Link>
-                <Link href="/" className="ext-link uppercase tracking-[0.14em]">Bounties</Link>
-                <span>·</span>
-                <span className="text-fg-dim">#{BOUNTY.id}</span>
+              <div className="flex items-center justify-between gap-4 font-mono text-[12px] text-fg-faint mb-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Link href="/" className="ext-link">←</Link>
+                  <Link href="/" className="ext-link uppercase tracking-[0.14em]">Bounties</Link>
+                  <span>·</span>
+                  <span className="text-fg-dim">#{BOUNTY.id} (Day-9 canonical PASS)</span>
+                </div>
+                <a
+                  href="https://chainscan-galileo.0g.ai/address/0xA0b83019181144529d202baa2E7391E42c4C9502"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ext-link tracking-[0.06em]"
+                  title="Latest cron-driven bounty on the live VPS swarm"
+                >
+                  See latest cron run · #26 ↗
+                </a>
               </div>
 
               <div className="flex items-start justify-between gap-8 flex-wrap">

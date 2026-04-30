@@ -56,4 +56,43 @@ cat > "$LOGDIR/latest.json" <<EOF
 }
 EOF
 
+# Push the artifact to GitHub via the deploy key, but only on a clean PASS.
+# Failures stay local — we don't want flaky 0G Storage runs to spam the badge.
+if [ "$result" = "PASS" ]; then
+  bountyId=$(echo $bid | cut -d= -f2)
+  bountyAddr=$(echo $addr | cut -d= -f2)
+  reportRoot=$(grep -oE "Final report root: 0x[0-9a-fA-F]+" "$log" | head -1 | awk '{print $4}')
+  createTx=$(grep -oE "tx: 0x[0-9a-fA-F]+" "$log" | head -1 | awk '{print $2}')
+  acceptTx=$(grep -oE "acceptPlanner tx: 0x[0-9a-fA-F]+" "$log" | head -1 | awk '{print $3}')
+  elapsed=$(grep -oE "\\+[0-9.]+s status: 6" "$log" | head -1 | sed 's/+\([0-9.]*\)s.*/\1/')
+  completedAtIso=$(date -u -d "$ts" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  cat > "$ROOT/docs/vps-runs/latest.json" <<EOF
+{
+  "_comment": "Auto-updated by scripts/vps-cron-bounty.sh on each successful cron run.",
+  "vpsHost": "roil-devnet (EU)",
+  "lastSuccessful": {
+    "bountyId": $bountyId,
+    "bountyAddress": "$bountyAddr",
+    "completedAt": "$completedAtIso",
+    "elapsedSeconds": ${elapsed:-0},
+    "finalReportRoot": "$reportRoot",
+    "createBountyTx": "$createTx",
+    "acceptPlannerTx": "$acceptTx",
+    "explorer": "https://chainscan-galileo.0g.ai/address/$bountyAddr",
+    "trigger": "cron · auto-fired by /etc/cron.d/scholar-swarm"
+  },
+  "deploymentNote": "5 AXL + 5 agent systemd units, restart=always. Cron fires every 6 hours."
+}
+EOF
+
+  cd "$ROOT"
+  git pull --rebase --autostash origin master 2>&1 | tail -3
+  git add docs/vps-runs/latest.json
+  if ! git diff --cached --quiet; then
+    git commit -m "vps-cron: bounty $bountyId completed in ${elapsed:-?}s (autonomous run $ts)"
+    git push origin master 2>&1 | tail -3
+  fi
+fi
+
 exit 0

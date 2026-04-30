@@ -1,16 +1,26 @@
 {
-  "_comment": "Latest auto-bounty completed by the live VPS swarm. Updated by /opt/scholar-swarm/scripts/vps-cron-bounty.sh every 6 hours. Frontend reads this file via raw.githubusercontent.com to render the 'Last live run' badge.",
+  "_comment": "Latest auto-bounty completed by the live VPS swarm. Updated by /opt/scholar-swarm/scripts/vps-cron-bounty.sh every 6 hours; the post-run hook in that script also commits this file and pushes via the deploy key. Frontend reads via raw.githubusercontent.com.",
   "vpsHost": "roil-devnet (EU)",
   "lastSuccessful": {
-    "bountyId": 25,
-    "bountyAddress": "0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75",
-    "completedAt": "2026-04-30T09:07:47.798Z",
-    "elapsedSeconds": 285.1,
-    "finalReportRoot": "0x3c5fb7ec2b1f9d6c286538cf0dcfd2e0132820835982df33c5066693423c92f0",
-    "createBountyTx": "0x0072199919a19eb2641fd6a2b6e337f1a4be531146cbcfefc6b9c5ab0b5d595c",
-    "acceptPlannerTx": "0x46ec4aefcdb93b9945e1be9990652e403d082f0d683ee36307be384746e38fea",
-    "explorer": "https://chainscan-galileo.0g.ai/address/0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75"
+    "bountyId": 26,
+    "bountyAddress": "0xA0b83019181144529d202baa2E7391E42c4C9502",
+    "completedAt": "2026-04-30T10:04:51Z",
+    "elapsedSeconds": 290.4,
+    "finalReportRoot": "0x912eb165df007b0d1e0c0686d1e61199930494c1b166fa13af6983ce9db889bb",
+    "createBountyTx": "0xfa54634f9a75dfdc4384a0e675aa626df98088fe413737798c5f27d98a8c8a05",
+    "acceptPlannerTx": "0x5e5ffdb7315ce6adcbe7ff17d2b27bd979401c49e3fedfeb7e1a4a5187c571fe",
+    "explorer": "https://chainscan-galileo.0g.ai/address/0xA0b83019181144529d202baa2E7391E42c4C9502",
+    "trigger": "cron · auto-fired by /etc/cron.d/scholar-swarm at 10:00 UTC"
   },
-  "totalRunsToday": 1,
-  "deploymentNote": "5 AXL nodes + 5 agent runtimes managed by systemd, restart=always. SearXNG on the same host serves retrieval. Cron triggers a fresh bounty every 6 hours."
+  "previousRuns": [
+    {
+      "bountyId": 25,
+      "bountyAddress": "0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75",
+      "completedAt": "2026-04-30T09:07:47.798Z",
+      "elapsedSeconds": 285.1,
+      "trigger": "manual · validation run before enabling cron"
+    }
+  ],
+  "totalSuccessfulToday": 2,
+  "deploymentNote": "5 AXL nodes + 5 agent runtimes managed by systemd, restart=always. SearXNG on the same host serves retrieval. Cron triggers a fresh bounty every 6 hours. The vps-cron-bounty.sh wrapper writes a per-run log to /var/log/scholar-cron/, updates this file in /opt/scholar-swarm/docs/vps-runs/, then commits and pushes via the deploy key."
 }

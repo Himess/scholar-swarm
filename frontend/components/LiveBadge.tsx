@@ -14,7 +14,9 @@ interface LiveRun {
     elapsedSeconds: number;
     finalReportRoot: string;
     explorer: string;
+    trigger?: string;
   };
+  totalSuccessfulToday?: number;
 }
 
 function relTime(iso: string): string {
@@ -66,7 +68,9 @@ export default function LiveBadge() {
     );
   }
 
-  const { lastSuccessful, vpsHost } = data;
+  const { lastSuccessful, vpsHost, totalSuccessfulToday } = data;
+  const isCron = (lastSuccessful.trigger ?? "").startsWith("cron");
+  const triggerLabel = isCron ? "cron-driven" : "validation";
 
   return (
     <a
@@ -74,12 +78,14 @@ export default function LiveBadge() {
       target="_blank"
       rel="noopener noreferrer"
       className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full bg-bg-elev border border-soft hover:border-accent transition-colors"
-      title={`VPS host: ${vpsHost} · Bounty #${lastSuccessful.bountyId}`}
+      title={`VPS host: ${vpsHost} · Bounty #${lastSuccessful.bountyId}${
+        totalSuccessfulToday ? ` · ${totalSuccessfulToday} runs today` : ""
+      }`}
     >
       <span className="dot dot-mint pulse-mint" />
       <span className="font-mono text-[12px] text-fg-dim tracking-[0.06em]">
-        VPS swarm live · last bounty <span className="text-fg">#{lastSuccessful.bountyId}</span>{" "}
-        completed in{" "}
+        VPS swarm live · last {triggerLabel} bounty{" "}
+        <span className="text-fg">#{lastSuccessful.bountyId}</span> in{" "}
         <span className="text-mint">{Math.round(lastSuccessful.elapsedSeconds)}s</span>{" "}
         <span className="text-fg-faint">· {relTime(lastSuccessful.completedAt)} ↗</span>
       </span>

@@ -44,7 +44,7 @@ Every major claim in this README backs to a real testnet transaction. Use the ta
 | **Cross-ISP AXL Yggdrasil mesh** — Türkiye laptop ↔ EU VPS bidirectional | [Spike 2b PASS in spike-results.md](./docs/spike-results.md) |
 | **iNFT royalty split (95/5 ERC-2981)** — pay-to-authorize tested live | [`0xcef64b77…` on 0Gscan](https://chainscan-galileo.0g.ai/address/0x61cb7bfca6ad0cb050ab227cb22710a932582c61) · [Spike 10 PASS](#spike-results) |
 | **KeeperHub workflow live on org** — `DistributeRequested` → `PaymentRouter.distribute` | [`nepsavmovlyko0luy3rpi` on app.keeperhub.com](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) |
-| **Live VPS swarm — auto-bounty cadence** (most recent: bounty 25, 4 min 45 s wall-clock, 2026-04-30) | [`0xc79B3d74…` on 0Gscan](https://chainscan-galileo.0g.ai/address/0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75) · [vps-runs/latest.json](./docs/vps-runs/latest.json) |
+| **Live VPS swarm — auto-bounty cadence** (2 successful runs 2026-04-30: bounty 25 manual @ 4 min 45 s, bounty 26 **cron-driven** @ 4 min 50 s) | [#25 `0xc79B3d74…`](https://chainscan-galileo.0g.ai/address/0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75) · [#26 `0xA0b83019…`](https://chainscan-galileo.0g.ai/address/0xA0b83019181144529d202baa2E7391E42c4C9502) · [vps-runs/latest.json](./docs/vps-runs/latest.json) |
 
 Comprehensive spike-by-spike breakdown with every transition tx hash: [`docs/spike-results.md`](./docs/spike-results.md). Builder-side narrative of the engineering pivots: [`docs/ai-collaboration/`](./docs/ai-collaboration/).
 
