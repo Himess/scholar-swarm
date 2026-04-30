@@ -26,7 +26,7 @@ Three mechanisms make the difference:
 > 🟢 **Real testnet, not a simulation.** 1.000000 Circle USDC distributed across 5 distinct operator wallets in **0.7 seconds** via KeeperHub Direct Execution. KH's Para wallet signed `PaymentRouter.distribute()` — we never held its key. Click and verify: [tx `0xa06717e4…f0b7` on Base Sepolia](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7).
 
 Submitted to **ETHGlobal Open Agents 2026**. Solo build by [@Himess](https://github.com/Himess).
-**Status (Day 11 / 2026-04-30):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live.
+**Status (Day 12 / 2026-04-30):** 11 contracts live on two chains · 5 iNFT agents minted to distinct operator wallets · **19/19 spikes PASS** including [Spike 18 — five OS processes, five AXL nodes, five 0G Compute ledgers, all coordinating one bounty end-to-end](#spike-results) (LZ V2 GUID `0x0c6eb880…`, 16 distinct chain txs from 5 wallets) and [Spike 19 — Circle USDC distributed across 5 wallets via KeeperHub Direct Execution](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) · cross-chain payout loop closes atomically on synthesis without an off-chain coordinator · self-hosted SearXNG retrieval, cross-ISP AXL mesh, all live · **continuously running on EU VPS with 6-hour auto-bounty cadence** ([latest run](./docs/vps-runs/latest.json)).
 
 ---
 
@@ -44,6 +44,7 @@ Every major claim in this README backs to a real testnet transaction. Use the ta
 | **Cross-ISP AXL Yggdrasil mesh** — Türkiye laptop ↔ EU VPS bidirectional | [Spike 2b PASS in spike-results.md](./docs/spike-results.md) |
 | **iNFT royalty split (95/5 ERC-2981)** — pay-to-authorize tested live | [`0xcef64b77…` on 0Gscan](https://chainscan-galileo.0g.ai/address/0x61cb7bfca6ad0cb050ab227cb22710a932582c61) · [Spike 10 PASS](#spike-results) |
 | **KeeperHub workflow live on org** — `DistributeRequested` → `PaymentRouter.distribute` | [`nepsavmovlyko0luy3rpi` on app.keeperhub.com](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) |
+| **Live VPS swarm — auto-bounty cadence** (most recent: bounty 25, 4 min 45 s wall-clock, 2026-04-30) | [`0xc79B3d74…` on 0Gscan](https://chainscan-galileo.0g.ai/address/0xc79B3d7400Eaa65978bc364eA019685F1C4E6e75) · [vps-runs/latest.json](./docs/vps-runs/latest.json) |
 
 Comprehensive spike-by-spike breakdown with every transition tx hash: [`docs/spike-results.md`](./docs/spike-results.md). Builder-side narrative of the engineering pivots: [`docs/ai-collaboration/`](./docs/ai-collaboration/).
 
@@ -268,6 +269,8 @@ Gensyn AXL is the inter-agent backbone. Without AXL, a centralized message broke
 - **`@scholar-swarm/axl-client`** — typed `AXLMessagingProvider` wrapping the local HTTP API at `:9002`.
 
 Cross-ISP test (Spike 2b, laptop-TR ⇄ EU VPS) **PASS Day 8** — bidirectional Yggdrasil round-trip with the same `/send` + `/recv` API path that `pnpm spike:03` exercises locally. Same code, one extra line in `Peers`.
+
+The swarm is now also **deployed live on the same EU VPS** — five `scholar-axl-*` systemd units coordinated with five `scholar-agent-*` agent runtimes (all `Restart=always`), and a cron job at `/etc/cron.d/scholar-swarm` triggers a fresh `pnpm spike:18:cli` every six hours. The most recent successful auto-run is in [`docs/vps-runs/latest.json`](./docs/vps-runs/latest.json); the live frontend at [scholar-swarm.vercel.app](https://scholar-swarm.vercel.app) reads that file and renders a pulsing badge showing wall-clock and time since completion. Bootstrap scripts: [`scripts/vps-boot-axl.sh`](./scripts/vps-boot-axl.sh), [`scripts/vps-setup-systemd.sh`](./scripts/vps-setup-systemd.sh), [`scripts/vps-setup-agent-systemd.sh`](./scripts/vps-setup-agent-systemd.sh), [`scripts/vps-cron-bounty.sh`](./scripts/vps-cron-bounty.sh).
 
 ---
 
