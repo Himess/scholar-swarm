@@ -94,17 +94,7 @@ The user gets a research report where every statement traces back to a fetched U
 
 ## The five agents (live iNFTs on 0G Galileo)
 
-Each agent is an **ERC-7857 iNFT** at `AgentNFT` ([`0x68c0175e9d9C6d39fC2278165C3Db93d484a5361`](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361)). The role definition + system prompt for each is **AES-256-GCM encrypted** and stored on 0G Storage; the merkle root is committed in `iNFT.intelligenceRoot`.
-
-| ID | Name | Role | Storage Root |
-|---|---|---|---|
-| 1 | Planner-Alpha | Planner | `0x5bf94ba24417…` |
-| 2 | Researcher-One | Researcher | `0x6ff1668a8e0b…` |
-| 3 | Researcher-Two | Researcher | `0xddcde3746fc2…` |
-| 4 | Critic-Prime | Critic | `0x14b122824a89…` |
-| 5 | Synthesizer-Final | Synthesizer | `0x5053fc01c8a7…` |
-
-Mint artifact: [`docs/spike-artifacts/minted-agents.json`](./docs/spike-artifacts/minted-agents.json). Reputation seeds and full encrypted-intelligence roundtrip in [`scripts/mint-agents.ts`](./scripts/mint-agents.ts).
+Five **ERC-7857 iNFTs** minted to five distinct operator wallets at `AgentNFT` [`0x68c0175e9d9C6d39fC2278165C3Db93d484a5361`](https://chainscan-galileo.0g.ai/address/0x68c0175e9d9C6d39fC2278165C3Db93d484a5361) — Planner-Alpha, Researcher-One, Researcher-Two, Critic-Prime, Synthesizer-Final. Each holds AES-256-GCM encrypted role definition + system prompt with the merkle root committed in `iNFT.intelligenceRoot`. Visual roster (operator wallets, storage roots, mint + transfer tx): [scholar-swarm.vercel.app/agents](https://scholar-swarm.vercel.app/agents). Mint artifact: [`docs/spike-artifacts/minted-agents.json`](./docs/spike-artifacts/minted-agents.json) · roundtrip code: [`scripts/mint-agents.ts`](./scripts/mint-agents.ts).
 
 ---
 
@@ -121,30 +111,11 @@ Frontend source: [`frontend/`](./frontend/) — Next.js 16 + Tailwind + Framer M
 
 ---
 
-## Status — what's working today
+## What this repo contains
 
 > **Two deliverables in one repo:** [`@scholar-swarm/sdk`](./packages/swarm-sdk/README.md) — a swarm-first agent framework in the OpenClaw family (N agents ⇄ 1 workflow, MIT, domain-agnostic) — and **Scholar Swarm itself**, the reference research application built on it (5 agent runtimes, 9 contracts across 2 chains, 2 LZ V2 OApps, 0G + AXL + KH adapters). Other teams fork the SDK to build code-review, legal-analysis, or investigative-journalism swarms.
 
-| Capability | Status | Proof |
-|---|---|---|
-| 0G Compute attested inference | ✅ live | qwen2.5-7b TeeML / dstack — [Spike 1 PASS](#spike-results) |
-| 0G Storage roundtrip | ✅ live | 297B blob, root `0x42408920…` — [Spike 5 PASS](#spike-results) |
-| 5 agents minted as iNFTs (distinct operator wallets) | ✅ live | AgentNFT `0x68c0175e…` — [§ The five agents](#the-five-agents-live-infts-on-0g-galileo) |
-| AXL P2P mesh between agents | ✅ live | 2-node Yggdrasil mesh, "hello" delivered — [Spike 2a PASS](#spike-results) |
-| MCP-over-AXL agent-to-tool | ✅ live | `/mcp/{peer}/test-service` roundtrip — [Spike 3 PASS](#spike-results) |
-| Retrieval adapters (SearXNG + Tavily, swappable) | ✅ live | Two `RetrievalProvider` impls in `@scholar-swarm/mcp-tools`; SearXNG self-hosted on the EU VPS, Tavily as the alternative — [Spike 15 PASS](#spike-results) |
-| KeeperHub Direct Execution | ✅ live | Real Base Sepolia transfer tx [`0x6ca23a64…`](https://sepolia.basescan.org/tx/0x6ca23a6491cd17fea40d3e9a866d3028a98709bfc548bd0bf98966e2e51f921b) |
-| KeeperHub MCP server (26 tools) | ✅ live | Streamable HTTP, real workflow listed — [Spike 8 PASS](#spike-results) |
-| KeeperHub workflow live on org | ✅ live | id [`nepsavmovlyko0luy3rpi`](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) — DistributeRequested → PaymentRouter.distribute — [Spike 13+14 PASS](#spike-results) |
-| LayerZero V2 OApps | ✅ live | 0G→Base message delivered, GUID `0x565ff853…` ([Spike 9 PASS](#spike-results)) |
-| iNFT royalty split (95/5 owner/creator) | ✅ live | 0.002 OG paid + on-chain split observed — [Spike 10 PASS](#spike-results) |
-| Full Bounty lifecycle E2E (16 txs, 6 signers) | ✅ live | bountyId 2 at `0x4a6FE339…F0f2`, all state transitions on-chain — [Spike 11 PASS](#spike-results) |
-| **Bounty.submitSynthesis fires LZ atomically** | ✅ live | V2 factory + payable submitSynthesis — GUID `0x6cfdf46b…` — [Spike 16 PASS](#spike-results) |
-| **Full E2E** (single-process orchestrator) | ✅ live | One script (`pnpm spike:17`), real Google sources via self-hosted SearXNG, 7 attested inferences, 7 storage refs, GUID `0x83e18d89…` — [Spike 17 PASS](#spike-results) |
-| **Multi-process choreography** (5 processes, 5 AXL nodes, 5 ledgers) | ✅ live | 5 OS processes coordinated bounty 20 end-to-end. 16 chain txs from 5 distinct operator wallets. Synth fires LZ V2 atomically — GUID `0x0c6eb880…` — [Spike 18 PASS](#spike-results) |
-| **Circle USDC end-to-end payout to 5 wallets** | ✅ live | KH Direct Execution signed `distribute()` with the Para wallet (we never had its key); 1.000000 USDC moved exactly per the Bounty.sol fee schedule. Tx [`0xa06717e4…`](https://sepolia.basescan.org/tx/0xa06717e4495a6df75d1127bd3b61bbc18884c91cca97c04071857589cf00f0b7) — [Spike 19 PASS](#spike-results) |
-| **SearXNG retrieval over MCP-over-AXL** | ✅ live | One AXL peer hosts a JSON-RPC router proxying SearXNG; another peer queries it via `POST /mcp/{peer}/searxng`. Real Google results ride the Yggdrasil mesh in 2.3s — [Spike 20 PASS](#spike-results) |
-| Cross-machine mesh (laptop TR ⇄ EU VPS) | ✅ live | Bidirectional `/send` ↔ `/recv` over Yggdrasil TLS round-trip, both peers in spanning tree — [Spike 2b PASS](#spike-results) |
+Every claim above traces to a live testnet artifact. The [Verifiable on-chain artifacts](#verifiable-on-chain-artifacts) table is the single-click verification entry point; full spike-by-spike breakdown with every transition tx hash lives in [`docs/spike-results.md`](./docs/spike-results.md).
 
 ---
 
@@ -308,48 +279,11 @@ Implementation: [`apps/agent-critic/src/role.ts`](./apps/agent-critic/src/role.t
 
 ---
 
-## Sponsor track positioning
-
-Three slots used; ETHGlobal allows multiple tracks per partner to count as one slot.
-
-| Slot | Sponsor | Tracks | Pool |
-|---|---|---|---|
-| 1 | **0G Labs** | Best Agent Framework + Best Autonomous Agents/Swarms/iNFT (dual) | $15k addressable |
-| 2 | **Gensyn AXL** | Best Application of AXL | $5k |
-| 3 | **KeeperHub** | Best Use of KH + Builder Feedback bonus | $4.5k + $500 |
-
-For each, our positioning paragraph is in [`docs/sponsor-pitches.md`](./docs/sponsor-pitches.md) (Day 11 polish).
-
----
-
 ## Spike results
 
-Each spike is a small standalone script that verifies one architectural assumption against live infrastructure. **20 of 20 pass** with on-chain or live-API proof.
+20 spike scripts verify each architectural assumption against live infrastructure. **20 / 20 PASS** with on-chain or live-API proof — covering 0G Compute attested inference, 0G Storage roundtrip, 5-node AXL mesh (incl. cross-ISP TR↔EU round-trip), MCP-over-AXL with real SearXNG retrieval (Spike 20), KH Direct Execution + KH MCP + KH workflow, LayerZero V2 cross-chain, iNFT royalty splits, full Bounty lifecycle, atomic LZ-fire on synthesis, multi-process choreography (Spike 18, GUID `0x0c6eb880…`), and real Circle USDC distribution (Spike 19, tx `0xa06717e4…`).
 
-| # | Spike | Status | Proof |
-|---|---|---|---|
-| 1 | 0G Compute sealed inference | ✅ PASS | qwen2.5-7b TeeML, attestation valid, tool use yes (calculator(18*24)→432). |
-| 2a | AXL local mesh | ✅ PASS | 2 `node.exe` instances, "hello scholar swarm" delivered. |
-| 2b | AXL cross-ISP mesh | ✅ PASS | TR laptop (residential NAT) ↔ EU VPS (public IPv4) bidirectional Yggdrasil round-trip; both pubkeys in spanning tree; messages delivered intact in both directions. Setup: [`docs/axl-vps-setup.md`](./docs/axl-vps-setup.md). |
-| 3 | MCP-over-AXL | ✅ PASS | `/mcp/{peer}/test-service` round-trip via mock router. |
-| 4 | KeeperHub Direct Execution | ✅ PASS | Live Base Sepolia transfer tx `0x6ca23a64…`. |
-| 5 | 0G Storage roundtrip | ✅ PASS | put 297B → root `0x42408920…`, get 2.3s, content equal. |
-| 7 | ERC-8004 + ERC-7857 spec | ✅ design | `AgentNFT` unifies both standards in one contract. |
-| 8 | KeeperHub MCP Streamable HTTP | ✅ PASS | 26 tools live, `list_workflows` + `list_action_schemas` confirmed. |
-| 9 | LayerZero V2 cross-chain | ✅ PASS | 0G→Base end-to-end, GUID `0x565ff853…`, ~40s latency, DVN-attested. |
-| 10 | iNFT royalty split (live) | ✅ PASS | 0.002 OG paid → 0.0019/0.0001 owner/creator on-chain split exact. |
-| 11 | Bounty lifecycle E2E (V1) | ✅ PASS | 16 txs, 6 distinct operator signers, full state machine Open→Completed. |
-| 12 | Synth fires LZ → Base (manual) | ✅ PASS | Synth signs `notifyCompletion`, Base emits `DistributeRequested` — GUID `0x1d96cc4c…`. |
-| 13 | KH `ai_generate_workflow` | ✅ PASS | KH AI drafted 6-op workflow definition for the DistributeRequested→distribute pipeline. |
-| 14 | KH `create_workflow` (live) | ✅ PASS | Workflow id [`nepsavmovlyko0luy3rpi`](https://app.keeperhub.com/workflows/nepsavmovlyko0luy3rpi) persisted on the org. |
-| 15 | Retrieval (SearXNG / Tavily, swappable) | ✅ PASS | Self-hosted SearXNG on the EU VPS reachable via SSH tunnel; 5 real Google results in 1.3s, top URL re-fetched HTTP 200 (Critic verification path). |
-| 16 | **Bounty.submitSynthesis fires LZ atomically (V2)** | ✅ PASS | V2 factory + payable submitSynthesis dispatches `notifyCompletion` in one tx — GUID `0x6cfdf46b…`. |
-| 17 | **Full E2E** (single-process orchestrator) | ✅ PASS | Single script: 7 attested 0G inferences + 7 0G Storage refs + bounty lifecycle + LZ V2 — GUID `0x82fcb3f2…`. |
-| 18 | **Multi-process choreography** | ✅ PASS | 5 OS processes / 5 AXL nodes / 5 0G Compute ledgers / 5 operator wallets. 16 distinct chain txs from 5 signers in one bounty. Synth fires LZ V2 atomically — GUID `0x0c6eb880…`. |
-| 19 | **Real Circle USDC payout to 5 wallets** | ✅ PASS | KH Direct Execution signed `PaymentRouter.distribute(...)` with the Para wallet; 1.000000 USDC split exactly per the Bounty fee schedule across 5 distinct operator wallets in 0.7s. Tx `0xa06717e4…`. |
-| 20 | **SearXNG retrieval over MCP-over-AXL** | ✅ PASS | One AXL peer hosts a JSON-RPC router (`infra/axl-node-b/searxng-mcp-router.js`) proxying SearXNG; another peer queries it via `POST /mcp/{peer}/searxng` and gets real Google/Bing/DuckDuckGo results back. Round-trip via Yggdrasil TLS overlay in 2.3s. Closes Spike 3's MCP-over-AXL transport with a real production tool. |
-
-Full artifacts: [`docs/spike-artifacts/`](./docs/spike-artifacts/).
+Per-spike artifact in [`docs/spike-results.md`](./docs/spike-results.md). Raw outputs in [`docs/spike-artifacts/`](./docs/spike-artifacts/). Sponsor track positioning paragraphs in [`docs/sponsor-pitches.md`](./docs/sponsor-pitches.md).
 
 ---
 
