@@ -2,7 +2,6 @@ import {
   type Agent,
   AGENT_NFT_CONTRACT,
   ogAddr,
-  ogToken,
   ogTx,
   truncAddr,
   truncHash,
@@ -57,10 +56,10 @@ export default function AgentCard({ agent }: { agent: Agent }) {
         </div>
 
         <a
-          href={ogToken(AGENT_NFT_CONTRACT, agent.agentId)}
+          href={ogTx(agent.mintTx)}
           target="_blank"
           rel="noopener noreferrer"
-          title={`View iNFT #${agent.agentId} on 0Gscan`}
+          title={`Mint tx for iNFT #${agent.agentId} on 0Gscan`}
           className="ext-link font-mono text-[11px] text-fg-faint hover:text-accent uppercase tracking-[0.1em]"
         >
           iNFT #{agent.agentId} ↗
